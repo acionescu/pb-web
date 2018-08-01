@@ -1,0 +1,148 @@
+html, body {
+	max-width: 100%;
+	overflow-x: hidden;
+	 font-family: sans-serif;
+}
+
+.button {
+    background-color: #26b39a; /* Green */
+    border: none;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 8px;
+   
+}
+
+.header {
+	/* 	width: 100%; */
+	height: 200px;
+	top: 0px;
+	left: 0px;
+	padding: 10px;
+	position: relative;
+	background-color: #486666;
+	position: relative;
+}
+
+.header .logoButton {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 180px;
+	min-width: 120px;
+	height: auto;
+}
+
+.header .logoButton img {
+	width: 180px;
+	height: auto;
+	min-width: 120px;
+}
+
+.headerButtons a {
+	margin-left: auto;
+	margin-right: auto;
+	border: thin solid black;
+	display: block;
+	width: 120px;
+}
+
+.sectionContent {
+	margin: 0px;
+	padding: 0px;
+}
+
+.sectionsTabs {
+	/* 	width:100%; */
+	
+}
+
+.sectionsTabs .ui-tabs-panel {
+	padding: 1px;
+}
+
+/* .ui-state-active, */
+/* .ui-widget-content .ui-state-active, */
+/* .ui-widget-header .ui-state-active, */
+/* a.ui-button:active, */
+/* .ui-button:active, */
+/* .ui-button.ui-state-active:hover { */
+/* 	border: 1px solid #003eff; */
+/* 	background: #486666; */
+/* 	font-weight: normal; */
+/* 	color: #ffffff; */
+/* } */
+.sectionDesc {
+	background-color: white;
+	color: gray;
+	font-size: x-large;
+	text-align: center;
+	/* 	width:100%; */
+	padding: 10px;
+}
+
+.notification {
+	width: 100%;
+	border: thin solid black;
+	margin-bottom: 5px;
+}
+
+.notifHeader {
+	background-color: #486666;
+	padding: 10px;
+	color: white;
+}
+
+.notifBody {
+	background-color: #F5F5DC;
+	padding: 10px;
+	max-width: 100%;
+	/* 	overflow-x: auto; */
+	word-wrap: break-word;
+}
+
+.notifFooter {
+	
+}
+
+@media only screen and (max-width:1000px) {
+	.header {
+/* 		background-color: green; */
+		min-height: 500px;
+	}
+	.header .logoButton {
+		min-width: 100%;
+	}
+	.header .logoButton img {
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+		min-width: 350px;
+		height: auto;
+	}
+	.headerButtons {
+		margin: 10px;
+		min-width: 100%;
+	}
+	.headerButtons a {
+		height: 100px;
+		min-width: 80%;
+	}
+	.button {
+		font-size: 80px !important;
+	}
+	.ui-button {
+		min-width: 320px;
+	}
+	.sectionDesc {
+		font-size: 50px !important;
+		padding: 10px;
+	}
+	.ui-tabs .ui-tabs-nav li a {
+		font-size: 30pt !important;
+	}
+}

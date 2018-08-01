@@ -1,0 +1,14 @@
+*.class
+*.jar
+*.war
+WebContent/VAADIN/widgetsets/
+.settings/
+target/*
+target
+log/
+spec/
+.classpath
+WebContent/WEB-INF/classes/
+WebContent/WEB-INF/lib/
+/build/
+/bin/

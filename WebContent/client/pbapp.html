@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Pb App - test</title>
+
+<script src="js/event-bus.js"></script>
+<script src="js/pb-app.js"></script>
+<script src="../tp/jquery-2.1.1.js"></script>
+
+<script src="../tp/jquery-ui.js"></script>
+
+<link rel="stylesheet" href="../tp/jquery-ui.css">
+<link rel="stylesheet" href="../css/pbapp.css">
+
+
+<script>
+    //     var agentsCount = 100;
+    var agentActionDelay = 0;
+    var agentStartDelay = 200;
+
+    $(document).ready(function() {
+	// 	updateTarget("/ogeg/ws/web/v0/events");
+    });
+
+    var agents = [];
+
+    var startInterval;
+
+    var pbAgent = null;
+    
+    var sectionRefreshing=false;
+
+    var wsHandler = {
+	onopen : function() {
+	    //                 setConnected(true);
+	    //                 $("#infoCont").hide();
+	    log('Info: WebSocket connection opened.');
+	},
+	onmessage : function(event) {
+	    log('Received: ' + event.data);
+	},
+	onclose : function(event) {
+	    //                 setConnected(false);
+	    var msg = 'WebSocket connection closed, Code: ' + event.code
+		    + (event.reason == "" ? "" : ", Reason: " + event.reason);
+
+	    $("#infoCont").text(msg).show();
+	    log(msg);
+	}
+    };
+
+    var clientActiveState = new WsState("ACTIVE", {
+	"EBUS:PEER:AUTHENTICATED" : function(ec) {
+	    log("connection active");
+	    $("#infoCont").text("connection active").show();
+	    pbAgent.doAppInit();
+	},
+	"APP:INIT:DATA" : function(ec) {
+	    log("init data: " + ec.event.data);
+	    initSections(ec.event.data);
+	},
+	"SECTION:NOTIFICATIONS:REFRESH" : function(ec) {
+	    
+	    refreshPublicUserDataSection(ec.event.data);
+	    sectionRefreshing=false;
+	}
+    });
+
+    function log(message) {
+
+	console.log(message);
+    }
+
+    function startTest(target) {
+	if (target == null) {
+	    target = document.getElementById('target').value;
+	}
+	startAgent(target, wsHandler, clientActiveState);
+    }
+
+    function stopTest() {
+	agents.forEach(function(a) {
+	    a.close();
+	});
+    }
+
+    function startAgent(target, handler, state) {
+	pbAgent = new PbAppClient(target, false, handler, state);
+	agents.push(pbAgent);
+	pbAgent.connect();
+
+    }
+
+    function updateTarget(target) {
+	if (window.location.protocol == 'http:') {
+	    document.getElementById('target').value = 'ws://'
+		    + window.location.host + target;
+	} else {
+	    document.getElementById('target').value = 'wss://'
+		    + window.location.host + target;
+	}
+    }
+
+    function getTargetUrl(uri) {
+	if (window.location.protocol == 'http:') {
+	    return 'ws://' + window.location.host + uri;
+	} else {
+	    return 'wss://' + window.location.host + uri;
+	}
+    }
+
+    function initInfiniteScroll(refreshFunc) {
+	var win = $(window);
+
+	// Each time the user scrolls
+	win.scroll(function() {
+	    // End of the document reached?
+	    if(sectionRefreshing){
+		return;
+	    }	
+	    if ($(document).height() - win.height()*1.3 <= win.scrollTop()) {
+		sectionRefreshing=true;
+		refreshFunc();
+	    }
+	});
+    }
+
+    function initSections(data) {
+	var sHeader = $("#sectionsHeader");
+	var sc = $("#sections");
+
+	var sArray = [];
+
+	for ( var i in data.sections) {
+	    var s = data.sections[i];
+	    log("adding section " + s.id);
+	    var h = $("<li><a href='#"+s.id+"'><span>" + s.label
+		    + "</span></a></li>");
+	    sHeader.append(h);
+
+	    var se = $("<div id='"+s.id+"'/>");
+	    se.addClass("sectionContent");
+	    var sDesc = $("<div>").addClass("sectionDesc").html(s.desc);
+	    se.append(sDesc);
+	    sc.append(se);
+	    sArray.push(s.id);
+
+	}
+
+	sc.tabs({
+
+	    active : 0,
+	    activate : function(e, ui) {
+		log("tab selected " + ui);
+	    },
+	    create : function(e, ui) {
+		log("tab created " + ui.tab);
+		sc.tabs("option", "active", 0);
+		var selectedTab = sc.tabs('option', 'active');
+		pbAgent.refreshSection({
+		    sectionId : sArray[selectedTab],
+		    startItem : 0,
+		    itemCount : 10
+		});
+	    }
+
+	});
+
+	// 	sc.click('tabselect', function(event, ui) {
+	// 	    var selectedTab = sc.tabs('option', 'active');
+	// 	    log("selected tab " + selectedTab + "->" + sArray[selectedTab]);
+	// 	    pbAgent.refreshSection({
+	// 		sectionId : sArray[selectedTab],
+	// 		startItem : 0,
+	// 		itemCount : 10
+	// 	    });
+	// 	});
+
+	sc.tabs("option", "active", 0);
+
+	initInfiniteScroll(getSectionRefreshFunction("web_s0", 10));
+    }
+
+    function getSectionRefreshFunction(sid, itemCount) {
+	return function() {
+	    log("calling refresh for section " + sid);
+	    pbAgent.refreshSection({
+		sectionId : sid,
+		startItem : $("#" + sid).children().length,
+		itemCount : itemCount
+	    });
+	}
+    }
+
+    function refreshPublicUserDataSection(data) {
+	for ( var i in data.data.notifications) {
+	    var n = data.data.notifications[i];
+	    var ne = $("#nTemplate").clone();
+	    var content = n.content.replace(/\n/g, "<br/>");
+	    ne.find(".notifHeader").first().text(
+		    "Către: " + n.targetInstitutionName);
+	    ne.find(".notifBody").first().html(content);
+
+	    $("#" + data.id).append(ne);
+	    ne.show();
+	}
+    }
+
+    startTest(getTargetUrl("/ogeg/ws/web/v0/events"));
+</script>
+
+
+</head>
+
+<body>
+
+	<div id="header" class="header">
+		<div class="logoButton">
+			<img src="../images/LOGOpanou.png">
+			<div class="headerButtons">
+				<a class="button"
+					href="https://segoia.ro/#apps">Instalează</a>
+			</div>
+		</div>
+	</div>
+	<div id="controls" hidden="true">
+		<div>
+			<input id="target" type="text" size="40" style="width: 350px" />
+
+		</div>
+		<div id="infoCont" style="display: none;"></div>
+		<button onclick="startTest()">Start</button>
+		<button onclick="stopTest()">Stop</button>
+
+	</div>
+
+	<div id="sections" class="sectionsTabs">
+		<ul id="sectionsHeader">
+
+		</ul>
+	</div>
+
+	<div id="nTemplate" class="notification" hidden="true">
+		<div class="notifHeader"></div>
+		<div class="notifBody"></div>
+		<div class="notifFooter"></div>
+	</div>
+</body>
+
+
+</html>

@@ -2,6 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="cache-control" content="no-cache" />
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, height=device-height"/>
 <title>Pb App - test</title>
 
 <script src="js/event-bus.js"></script>
@@ -11,8 +13,8 @@
 <script src="../tp/jquery-ui.js"></script>
 
 <link rel="stylesheet" href="../tp/jquery-ui.css">
-<link rel="stylesheet" href="../css/pbapp.css">
-
+<link rel="stylesheet" href="../css/pbapp.css?v=1.7">
+<link rel="stylesheet" href="../css/nav.css?v=1.4">
 
 <script>
     //     var agentsCount = 100;
@@ -21,6 +23,15 @@
 
     $(document).ready(function() {
 	// 	updateTarget("/ogeg/ws/web/v0/events");
+
+	$('.toggle-nav').click(function(e) {
+	    $(this).toggleClass('active');
+	    $('.menu ul').toggleClass('active');
+
+	    e.preventDefault();
+
+	});
+
     });
 
     var agents = [];
@@ -28,8 +39,10 @@
     var startInterval;
 
     var pbAgent = null;
-    
-    var sectionRefreshing=false;
+
+    var sectionRefreshing = false;
+
+    sectionsData = {};
 
     var wsHandler = {
 	onopen : function() {
@@ -61,9 +74,9 @@
 	    initSections(ec.event.data);
 	},
 	"SECTION:NOTIFICATIONS:REFRESH" : function(ec) {
-	    
+
 	    refreshPublicUserDataSection(ec.event.data);
-	    sectionRefreshing=false;
+	    sectionRefreshing = false;
 	}
     });
 
@@ -116,11 +129,11 @@
 	// Each time the user scrolls
 	win.scroll(function() {
 	    // End of the document reached?
-	    if(sectionRefreshing){
+	    if (sectionRefreshing) {
 		return;
-	    }	
-	    if ($(document).height() - win.height()*1.3 <= win.scrollTop()) {
-		sectionRefreshing=true;
+	    }
+	    if ($(document).height() - win.height() * 1.3 <= win.scrollTop()) {
+		sectionRefreshing = true;
 		refreshFunc();
 	    }
 	});
@@ -128,44 +141,46 @@
 
     function initSections(data) {
 	var sHeader = $("#sectionsHeader");
-	var sc = $("#sections");
+	// 	var sc = $("#sections");
 
 	var sArray = [];
 
 	for ( var i in data.sections) {
 	    var s = data.sections[i];
+	    sectionsData[s.id] = s;
 	    log("adding section " + s.id);
 	    var h = $("<li><a href='#"+s.id+"'><span>" + s.label
 		    + "</span></a></li>");
+	    h.attr('id', s.id);
 	    sHeader.append(h);
 
-	    var se = $("<div id='"+s.id+"'/>");
-	    se.addClass("sectionContent");
-	    var sDesc = $("<div>").addClass("sectionDesc").html(s.desc);
-	    se.append(sDesc);
-	    sc.append(se);
+	    // 	    var se = $("<div id='"+s.id+"'/>");
+	    // 	    se.addClass("sectionContent");
+	    // 	    var sDesc = $("<div>").addClass("sectionDesc").html(s.desc);
+	    // 	    se.append(sDesc);
+	    // 	    sc.append(se);
 	    sArray.push(s.id);
 
 	}
 
-	sc.tabs({
+	// 	sc.tabs({
 
-	    active : 0,
-	    activate : function(e, ui) {
-		log("tab selected " + ui);
-	    },
-	    create : function(e, ui) {
-		log("tab created " + ui.tab);
-		sc.tabs("option", "active", 0);
-		var selectedTab = sc.tabs('option', 'active');
-		pbAgent.refreshSection({
-		    sectionId : sArray[selectedTab],
-		    startItem : 0,
-		    itemCount : 10
-		});
-	    }
+	// 	    active : 0,
+	// 	    activate : function(e, ui) {
+	// 		log("tab selected " + ui);
+	// 	    },
+	// 	    create : function(e, ui) {
+	// 		log("tab created " + ui.tab);
+	// 		sc.tabs("option", "active", 0);
+	// 		var selectedTab = sc.tabs('option', 'active');
+	// 		pbAgent.refreshSection({
+	// 		    sectionId : sArray[selectedTab],
+	// 		    startItem : 0,
+	// 		    itemCount : 10
+	// 		});
+	// 	    }
 
-	});
+	// 	});
 
 	// 	sc.click('tabselect', function(event, ui) {
 	// 	    var selectedTab = sc.tabs('option', 'active');
@@ -177,9 +192,35 @@
 	// 	    });
 	// 	});
 
-	sc.tabs("option", "active", 0);
+	// 	sc.tabs("option", "active", 0);
 
 	initInfiniteScroll(getSectionRefreshFunction("web_s0", 10));
+
+	$(".menu ul li").click(function(e) {
+	    $(".menu ul .current-item").toggleClass("current-item");
+	    $(this).toggleClass("current-item");
+	    var cid = $(this).attr('id');
+	    log("selected: " + cid);
+
+	    $("#contentDesc").empty();
+	    $("#contentBody").empty();
+
+	    var sData = sectionsData[cid];
+
+	    if (sData) {
+		$("#contentDesc").html(sData.desc);
+
+		pbAgent.refreshSection({
+		    sectionId : cid,
+		    startItem : 0,
+		    itemCount : 10
+		});
+	    }
+	});
+	
+	/* generate load first item */
+	
+	$(".menu ul li").first().click();
     }
 
     function getSectionRefreshFunction(sid, itemCount) {
@@ -187,7 +228,7 @@
 	    log("calling refresh for section " + sid);
 	    pbAgent.refreshSection({
 		sectionId : sid,
-		startItem : $("#" + sid).children().length,
+		startItem : $("#contentBody").children().length,
 		itemCount : itemCount
 	    });
 	}
@@ -197,12 +238,14 @@
 	for ( var i in data.data.notifications) {
 	    var n = data.data.notifications[i];
 	    var ne = $("#nTemplate").clone();
+	    ne.attr('id',"notif-"+$("#contentBody").children().length);
 	    var content = n.content.replace(/\n/g, "<br/>");
-	    ne.find(".notifHeader").first().text(
+	    ne.find(".notifHeader").first().html(
 		    "Către: " + n.targetInstitutionName);
 	    ne.find(".notifBody").first().html(content);
 
-	    $("#" + data.id).append(ne);
+	    // 	    $("#" + data.id).append(ne);
+	    $("#contentBody").append(ne);
 	    ne.show();
 	}
     }
@@ -219,8 +262,7 @@
 		<div class="logoButton">
 			<img src="../images/LOGOpanou.png">
 			<div class="headerButtons">
-				<a class="button"
-					href="https://segoia.ro/#apps">Instalează</a>
+				<a class="button" href="https://segoia.ro/#apps">Instalează</a>
 			</div>
 		</div>
 	</div>
@@ -234,12 +276,30 @@
 		<button onclick="stopTest()">Stop</button>
 
 	</div>
-
-	<div id="sections" class="sectionsTabs">
-		<ul id="sectionsHeader">
-
+	<a class="toggle-nav" href="#">&#9776;</a>
+	<nav class="menu">
+		<ul id="sectionsHeader" class="active">
+<!-- 			<li class="current-item"><a href="#">Home</a></li> -->
+<!-- 			<li><a href="#">My Work</a></li> -->
+<!-- 			<li><a href="#">About Me</a></li> -->
+<!-- 			<li><a href="#">Get in Touch</a></li> -->
+<!-- 			<li><a href="#">Blog</a></li> -->
 		</ul>
+
+		
+
+	</nav>
+
+	<div id="mainContent">
+		<div id="contentDesc" class="sectionDesc"></div>
+		<div id="contentBody" class="sectionContent"></div>
 	</div>
+
+<!-- 	<div id="sections" class="sectionsTabs"> -->
+<!-- 		<ul id="sectionsHeader"> -->
+
+<!-- 		</ul> -->
+<!-- 	</div> -->
 
 	<div id="nTemplate" class="notification" hidden="true">
 		<div class="notifHeader"></div>

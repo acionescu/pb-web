@@ -43,6 +43,8 @@
     var sectionRefreshing = false;
 
     sectionsData = {};
+    
+    var lastScrollFunc;
 
     var wsHandler = {
 	onopen : function() {
@@ -125,9 +127,7 @@
 
     function initInfiniteScroll(refreshFunc) {
 	var win = $(window);
-
-	// Each time the user scrolls
-	win.scroll(function() {
+	lastScrollFunc=function() {
 	    // End of the document reached?
 	    if (sectionRefreshing) {
 		return;
@@ -136,12 +136,20 @@
 		sectionRefreshing = true;
 		refreshFunc();
 	    }
-	});
+	};
+	// Each time the user scrolls
+	win.scroll(lastScrollFunc);
+    }
+    
+    function removeInfiniteScroll(){
+	$(window).off("scroll",lastScrollFunc);
     }
 
     function initSections(data) {
 	var sHeader = $("#sectionsHeader");
 	// 	var sc = $("#sections");
+	
+	var about = $("#about");
 
 	var sArray = [];
 
@@ -152,7 +160,8 @@
 	    var h = $("<li><a href='#"+s.id+"'><span>" + s.label
 		    + "</span></a></li>");
 	    h.attr('id', s.id);
-	    sHeader.append(h);
+	    
+	    about.before(h);
 
 	    // 	    var se = $("<div id='"+s.id+"'/>");
 	    // 	    se.addClass("sectionContent");
@@ -194,7 +203,7 @@
 
 	// 	sc.tabs("option", "active", 0);
 
-	initInfiniteScroll(getSectionRefreshFunction("web_s0", 10));
+// 	initInfiniteScroll(getSectionRefreshFunction("web_s0", 10));
 
 	$(".menu ul li").click(function(e) {
 	    $(".menu ul .current-item").toggleClass("current-item");
@@ -206,8 +215,9 @@
 	    $("#contentBody").empty();
 
 	    var sData = sectionsData[cid];
-
+	    removeInfiniteScroll();
 	    if (sData) {
+		initInfiniteScroll(getSectionRefreshFunction(cid, 10));
 		$("#contentDesc").html(sData.desc);
 
 		pbAgent.refreshSection({
@@ -216,6 +226,10 @@
 		    itemCount : 10
 		});
 	    }
+	    else{
+		$("#contentBody").load("./client/"+$(this).find("a").first().attr('href').substr(1)+".html");
+	    }
+	    window.location.hash = '#'+cid;
 	});
 	
 	/* generate load first item */
@@ -284,6 +298,8 @@
 <!-- 			<li><a href="#">About Me</a></li> -->
 <!-- 			<li><a href="#">Get in Touch</a></li> -->
 <!-- 			<li><a href="#">Blog</a></li> -->
+			<li id="about"><a href="#despre">Despre</a></li>
+			<li id="toc"><a href="#toc">Termeni și condiții</a></li>
 		</ul>
 
 		

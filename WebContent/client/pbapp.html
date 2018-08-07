@@ -3,7 +3,20 @@
 <head>
 <meta charset="utf-8" />
 <meta http-equiv="cache-control" content="no-cache" />
-<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, height=device-height"/>
+<meta name="viewport"
+	content="width=device-width, user-scalable=no, initial-scale=1, height=device-height" />
+
+<meta property="og:image" content="./images/LOGOpanou.png" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Panoul de Bord" />
+<meta property="og:description"
+	content="Site de prezentare a informațiilor de ordin public,
+	aferente solicitărilor și petițiilor trimise de utilizatori din
+	aplicația de mobil Panoul de Bord" />
+
+<meta name="description" content="Site de prezentare a informațiilor de ordin public,
+	aferente solicitărilor și petițiilor trimise de utilizatori din
+	aplicația de mobil Panoul de Bord" />
 <title>Pb App - test</title>
 
 <script src="./client/js/event-bus.js"></script>
@@ -43,7 +56,7 @@
     var sectionRefreshing = false;
 
     sectionsData = {};
-    
+
     var lastScrollFunc;
 
     var wsHandler = {
@@ -127,7 +140,7 @@
 
     function initInfiniteScroll(refreshFunc) {
 	var win = $(window);
-	lastScrollFunc=function() {
+	lastScrollFunc = function() {
 	    // End of the document reached?
 	    if (sectionRefreshing) {
 		return;
@@ -140,15 +153,15 @@
 	// Each time the user scrolls
 	win.scroll(lastScrollFunc);
     }
-    
-    function removeInfiniteScroll(){
-	$(window).off("scroll",lastScrollFunc);
+
+    function removeInfiniteScroll() {
+	$(window).off("scroll", lastScrollFunc);
     }
 
     function initSections(data) {
 	var sHeader = $("#sectionsHeader");
 	// 	var sc = $("#sections");
-	
+
 	var about = $("#about");
 
 	var sArray = [];
@@ -160,7 +173,7 @@
 	    var h = $("<li><a href='#"+s.id+"'><span>" + s.label
 		    + "</span></a></li>");
 	    h.attr('id', s.id);
-	    
+
 	    about.before(h);
 
 	    // 	    var se = $("<div id='"+s.id+"'/>");
@@ -203,37 +216,41 @@
 
 	// 	sc.tabs("option", "active", 0);
 
-// 	initInfiniteScroll(getSectionRefreshFunction("web_s0", 10));
+	// 	initInfiniteScroll(getSectionRefreshFunction("web_s0", 10));
 
-	$(".menu ul li").click(function(e) {
-	    $(".menu ul .current-item").toggleClass("current-item");
-	    $(this).toggleClass("current-item");
-	    var cid = $(this).attr('id');
-	    log("selected: " + cid);
+	$(".menu ul li").click(
+		function(e) {
+		    $(".menu ul .current-item").toggleClass("current-item");
+		    $(this).toggleClass("current-item");
+		    var cid = $(this).attr('id');
+		    log("selected: " + cid);
 
-	    $("#contentDesc").empty();
-	    $("#contentBody").empty();
+		    $("#contentDesc").empty();
+		    $("#contentBody").empty();
 
-	    var sData = sectionsData[cid];
-	    removeInfiniteScroll();
-	    if (sData) {
-		initInfiniteScroll(getSectionRefreshFunction(cid, 10));
-		$("#contentDesc").html(sData.desc);
+		    var sData = sectionsData[cid];
+		    removeInfiniteScroll();
+		    if (sData) {
+			initInfiniteScroll(getSectionRefreshFunction(cid, 10));
+			$("#contentDesc").html(sData.desc);
 
-		pbAgent.refreshSection({
-		    sectionId : cid,
-		    startItem : 0,
-		    itemCount : 10
+			pbAgent.refreshSection({
+			    sectionId : cid,
+			    startItem : 0,
+			    itemCount : 10
+			});
+		    } else {
+			$("#contentBody").load(
+				"./client/"
+					+ $(this).find("a").first()
+						.attr('href').substr(1)
+					+ ".html");
+		    }
+		    window.location.hash = '#' + cid;
 		});
-	    }
-	    else{
-		$("#contentBody").load("./client/"+$(this).find("a").first().attr('href').substr(1)+".html");
-	    }
-	    window.location.hash = '#'+cid;
-	});
-	
+
 	/* generate load first item */
-	
+
 	$(".menu ul li").first().click();
     }
 
@@ -252,7 +269,7 @@
 	for ( var i in data.data.notifications) {
 	    var n = data.data.notifications[i];
 	    var ne = $("#nTemplate").clone();
-	    ne.attr('id',"notif-"+$("#contentBody").children().length);
+	    ne.attr('id', "notif-" + $("#contentBody").children().length);
 	    var content = n.content.replace(/\n/g, "<br/>");
 	    ne.find(".notifHeader").first().html(
 		    "Către: " + n.targetInstitutionName);
@@ -293,16 +310,16 @@
 	<a class="toggle-nav" href="#">&#9776;</a>
 	<nav class="menu">
 		<ul id="sectionsHeader" class="active">
-<!-- 			<li class="current-item"><a href="#">Home</a></li> -->
-<!-- 			<li><a href="#">My Work</a></li> -->
-<!-- 			<li><a href="#">About Me</a></li> -->
-<!-- 			<li><a href="#">Get in Touch</a></li> -->
-<!-- 			<li><a href="#">Blog</a></li> -->
+			<!-- 			<li class="current-item"><a href="#">Home</a></li> -->
+			<!-- 			<li><a href="#">My Work</a></li> -->
+			<!-- 			<li><a href="#">About Me</a></li> -->
+			<!-- 			<li><a href="#">Get in Touch</a></li> -->
+			<!-- 			<li><a href="#">Blog</a></li> -->
 			<li id="about"><a href="#despre">Despre</a></li>
 			<li id="toc"><a href="#toc">Termeni și condiții</a></li>
 		</ul>
 
-		
+
 
 	</nav>
 
@@ -311,11 +328,11 @@
 		<div id="contentBody" class="sectionContent"></div>
 	</div>
 
-<!-- 	<div id="sections" class="sectionsTabs"> -->
-<!-- 		<ul id="sectionsHeader"> -->
+	<!-- 	<div id="sections" class="sectionsTabs"> -->
+	<!-- 		<ul id="sectionsHeader"> -->
 
-<!-- 		</ul> -->
-<!-- 	</div> -->
+	<!-- 		</ul> -->
+	<!-- 	</div> -->
 
 	<div id="nTemplate" class="notification" hidden="true">
 		<div class="notifHeader"></div>

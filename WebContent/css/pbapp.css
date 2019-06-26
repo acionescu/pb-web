@@ -18,6 +18,46 @@ html, body {
 	border-radius: 8px;
 }
 
+button {
+	background-color: #26b39a; /* Green */
+	border: none;
+	color: white;
+	padding: 5px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	border-radius: 8px;
+}
+
+.select-style {
+    border: 1px solid #486666;
+    
+    border-radius: 8px;
+    overflow: hidden;
+    background: #F5F5DC url("data:image/png;base64,R0lGODlhDwAUAIABAAAAAP///yH5BAEAAAEALAAAAAAPABQAAAIXjI+py+0Po5wH2HsXzmw//lHiSJZmUAAAOw==") no-repeat 95% 50%;
+}
+
+.select-style:active{
+	color: #486666;
+	background-color: #26b39a;
+}
+
+.select-style select {
+    padding: 5px 8px;
+    width: 130%;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    background-image: none;
+    -webkit-appearance: none;
+}
+
+.select-style select:focus {
+    outline: none;
+}
+
+
 .header {
 	/* 		width: 100%; */
 	height: 210px;
@@ -106,6 +146,54 @@ html, body {
 	
 }
 
+.notifStats{
+	background-color: #F5F5DC;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top:5px;
+	padding-bottom:5px;
+	border-bottom: 1px solid #486666;
+}
+
+.statsItem{
+	color: gray;
+	margin-right: 0.4em;
+}
+
+.filtersContaier{
+	padding:10px;
+	border-top: 1px solid #486666;
+	
+	display: grid;
+  	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  	grid-gap: 15px;
+  	align-items: stretch;
+}
+
+.filterBtn{
+	width: 100%;
+	height: 100%;
+}
+
+.filterCont{
+/* 	margin: 10px; */
+	width: 100%;
+	
+}
+
+.filterTitle {
+	margin-bottom: 5px;
+	padding-left: 5px;	
+}
+
+.filterCont > select{
+	width: 100%;
+}
+
+.statsIcon{
+	margin-right: 0.2em;
+}
+
 @media only screen and (max-width:980px) {
 	/* 	.header { */
 	/* 		min-height: 500px; */
@@ -130,6 +218,15 @@ html, body {
 		min-width: 80%;
 		font-size: 1.4em;
 	}
+	.select-style{
+		min-height: 1.4em;
+		font-size: 1.4em;
+	}
+	
+	button{
+		font-size: 1.4em !important;
+	}
+	
 	.button {
 		font-size: 1.2empx !important;
 	}

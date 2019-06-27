@@ -348,7 +348,7 @@ var CONDITIONS=CONDITIONS || {
 var PB=PB || {
     /* the client agent used to communicate with the server */
     pbAgent:null,
-    logging:true
+    logging:false
 };
 
 PB.testCondition=function(cond, dataContext){

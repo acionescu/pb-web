@@ -63,6 +63,9 @@
     var currentSectionData;
     
     var filtersController;
+    
+    /* values of filters on last refresh */
+    var lastRefreshFilters={};
 
     var wsHandler = {
 	onopen : function() {
@@ -119,8 +122,9 @@
     });
 
     function log(message) {
-
-	console.log(message);
+	if(PB.logging){
+		console.log(message);
+	}
     }
 
     function startTest(target) {
@@ -305,7 +309,8 @@
     
     function refreshCurrentSection(){
 	$("#contentBody").empty();
-	
+	/* reset last filters values */
+	lastRefreshFilters={};
 	var filtersValues = getFiltersValues();
 	/* remove old scroll */
 	removeInfiniteScroll();
@@ -323,10 +328,13 @@
 	
 	/* init scroll with new filters */
 	initInfiniteScroll(getSectionRefreshFunction(currentSectionData.id, 10, filtersValues));
+	
+	$("#sfBtn").attr("disabled",true);
     }
     
     function getFiltersValues(){
 	var values=[];
+	
 	for(var i in sectionFilters){
 	    var f = sectionFilters[i];
 	    if(!f.showing){
@@ -335,6 +343,7 @@
 	    var fv = f.getUiValue();
 	    if(fv !== 'undefined'){
 	    	values.push({fieldValue:{id:f.df.id, value:fv}});
+	    	lastRefreshFilters[f.df.id]=fv;
 	    }
 	}
 	return values;
@@ -375,6 +384,14 @@
 		}
 	    	filtersE.append(fe);
 	    	fc.initUi();
+	    	
+	    	fc.addChangeListener(function(ec){
+	    	   log(ec.df.id+" has changed"); 
+	    	   
+	    	   if(lastRefreshFilters[ec.df.id] != ec.getUiValue()){
+	    	       $("#sfBtn").attr("disabled",false);
+	    	   }
+	    	});
 	    }
 	}
 	
@@ -382,8 +399,9 @@
 	
 	if(filtersE.children().length > 0){
 	    var btnCont= $("<div>").addClass("filterCont");
-	    var filterBtn = $("<button>").addClass("filterBtn").text("Filtrează");
+	    var filterBtn = $("<button id='sfBtn'>").addClass("filterBtn").text("Filtrează");
 	    btnCont.append(filterBtn);
+	    
 	    
 	    filterBtn.click(function(e){
 		refreshCurrentSection();
@@ -391,7 +409,11 @@
 	    
 	    filtersE.append(btnCont);
 	    
+// 	    /* start with filtering button disabled */
+// 	    filterBtn.attr("disabled",true);
+	    
 	    filtersE.show();
+	    
 	}
 	else{
 	    filtersE.hide();
@@ -460,6 +482,11 @@
 	    // 	    $("#" + data.id).append(ne);
 	    $("#contentBody").append(ne);
 	    ne.show();
+	}
+	
+	/* display no content info, if the case */
+	if($("#contentBody").children().length == 0){
+	    $("#contentBody").html("<div class='noContent'>Nu există înregistrări</div>");
 	}
     }
 

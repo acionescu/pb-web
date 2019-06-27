@@ -1,5 +1,5 @@
 var EBUS = EBUS || {
-
+    logging:true,
     WS : {
 	/**
 	 * each state may defined handlers for different event types
@@ -164,7 +164,9 @@ EventWsEndpoint.prototype.bindWs = function() {
 }
 
 EventWsEndpoint.prototype.log = function(message) {
-    console.log(this.id + " : " + message);
+    if(EBUS.logging){
+	console.log(this.id + " : " + message);
+    }
 }
 
 EventWsEndpoint.prototype.send = function(event) {

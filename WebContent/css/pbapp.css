@@ -30,6 +30,10 @@ button {
 	border-radius: 8px;
 }
 
+button:disabled{
+	background-color:gray;	
+}
+
 .select-style {
     border: 1px solid #486666;
     
@@ -98,6 +102,15 @@ button {
 	padding: 0px;
 }
 
+.noContent{
+	background-color: white;
+	color: gray;
+	font-size: large;
+	text-align: center;
+	
+	padding: 10px;
+}
+
 .sectionsTabs {
 	/* 	width:100%; */
 	
@@ -112,7 +125,7 @@ button {
 	color: gray;
 	font-size: x-large;
 	text-align: center;
-	/* 	width:100%; */
+	
 	padding: 10px;
 }
 

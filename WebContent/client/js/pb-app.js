@@ -219,6 +219,13 @@ DataFieldController.prototype.setupChangeListener=function(listener){
     
 }
 
+DataFieldController.prototype.addChangeListener=function(listener){
+    var self=this;
+    this.elem.change(function(e){
+	listener(self);
+    })
+}
+
 /**
  * Override for specific types
  */
@@ -340,7 +347,8 @@ var CONDITIONS=CONDITIONS || {
 
 var PB=PB || {
     /* the client agent used to communicate with the server */
-    pbAgent:null
+    pbAgent:null,
+    logging:true
 };
 
 PB.testCondition=function(cond, dataContext){

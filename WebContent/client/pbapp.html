@@ -50,8 +50,6 @@
 
     var startInterval;
 
-//     var pbAgent = null;
-
     var sectionRefreshing = false;
 
     sectionsData = {};
@@ -213,39 +211,6 @@
 
 	}
 
-	// 	sc.tabs({
-
-	// 	    active : 0,
-	// 	    activate : function(e, ui) {
-	// 		log("tab selected " + ui);
-	// 	    },
-	// 	    create : function(e, ui) {
-	// 		log("tab created " + ui.tab);
-	// 		sc.tabs("option", "active", 0);
-	// 		var selectedTab = sc.tabs('option', 'active');
-	// 		pbAgent.refreshSection({
-	// 		    sectionId : sArray[selectedTab],
-	// 		    startItem : 0,
-	// 		    itemCount : 10
-	// 		});
-	// 	    }
-
-	// 	});
-
-	// 	sc.click('tabselect', function(event, ui) {
-	// 	    var selectedTab = sc.tabs('option', 'active');
-	// 	    log("selected tab " + selectedTab + "->" + sArray[selectedTab]);
-	// 	    pbAgent.refreshSection({
-	// 		sectionId : sArray[selectedTab],
-	// 		startItem : 0,
-	// 		itemCount : 10
-	// 	    });
-	// 	});
-
-	// 	sc.tabs("option", "active", 0);
-
-	// 	initInfiniteScroll(getSectionRefreshFunction("web_s0", 10));
-
 	$(".menu ul li").click(
 		function(e) {
 		    $(".menu ul .current-item").toggleClass("current-item");
@@ -255,7 +220,7 @@
 
 		    $("#contentDesc").empty();
 		    $("#contentBody").empty();
-
+		    
 		    var sData = sectionsData[cid];
 		    currentSectionData=sData;
 		    removeInfiniteScroll();
@@ -276,6 +241,10 @@
 			    itemCount : 10
 			});
 		    } else {
+			$("#contentFilters").hide();
+			
+			$("#contentDesc").html($(this).text());
+			
 			$("#contentBody").load(
 				"./client/"
 					+ $(this).find("a").first()
@@ -283,6 +252,14 @@
 					+ ".html");
 		    }
 		    window.location.hash = '#' + cid;
+		    
+		    /* hide menu on click in mobile mode */
+		    if(!$(".toggle-nav").hasClass("active")){
+			$(".toggle-nav").addClass('active');
+			$('.menu ul').addClass('active');
+		    }
+		    
+		    
 		});
 
 	var fragment = window.location.hash;
@@ -519,11 +496,6 @@
 	<a class="toggle-nav" href="#">&#9776;</a>
 	<nav class="menu">
 		<ul id="sectionsHeader" class="active">
-			<!-- 			<li class="current-item"><a href="#">Home</a></li> -->
-			<!-- 			<li><a href="#">My Work</a></li> -->
-			<!-- 			<li><a href="#">About Me</a></li> -->
-			<!-- 			<li><a href="#">Get in Touch</a></li> -->
-			<!-- 			<li><a href="#">Blog</a></li> -->
 			<li id="despre"><a href="#despre">Despre</a></li>
 			<li id="toc"><a href="#toc">Termeni și condiții</a></li>
 		</ul>

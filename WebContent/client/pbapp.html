@@ -17,6 +17,8 @@
 
 <script src="./client/js/event-bus.js"></script>
 <script src="./client/js/pb-app.js"></script>
+<script src="./client/js/util.js"></script>
+<script src="./client/js/pb-app-geo.js"></script>
 <script src="./tp/jquery-2.1.1.js"></script>
 
 <script src="./tp/jquery-ui.js"></script>
@@ -185,10 +187,12 @@
     }
 
     function initSections(data) {
+	PB.initModules(data);
+	
 	var sHeader = $("#sectionsHeader");
 	// 	var sc = $("#sections");
 
-	var about = $("#despre");
+	var about = $("#harta_trafic");
 
 	var sArray = [];
 
@@ -249,7 +253,7 @@
 				"./client/"
 					+ $(this).find("a").first()
 						.attr('href').substr(1)
-					+ ".html");
+					+ ".html", 'f' + (Math.random()*1000000));
 		    }
 		    window.location.hash = '#' + cid;
 		    
@@ -496,6 +500,8 @@
 	<a class="toggle-nav" href="#">&#9776;</a>
 	<nav class="menu">
 		<ul id="sectionsHeader" class="active">
+			<li id="harta_trafic"><a href="#harta_trafic">Hartă trafic</a></li>
+<!-- 			<li id="harta_sesizari"><a href="#harta_sesizari">Hartă sesizări</a></li> -->
 			<li id="despre"><a href="#despre">Despre</a></li>
 			<li id="toc"><a href="#toc">Termeni și condiții</a></li>
 		</ul>

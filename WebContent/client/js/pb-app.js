@@ -346,10 +346,17 @@ var CONDITIONS=CONDITIONS || {
 
 
 var PB=PB || {
+    MODULES:{},
     /* the client agent used to communicate with the server */
     pbAgent:null,
     logging:true
 };
+
+PB.initModules = function(data){
+    for(var mid in PB.MODULES){
+	PB.MODULES[mid].init(data);
+    }
+}
 
 PB.testCondition=function(cond, dataContext){
     var cf = CONDITIONS[cond.type];

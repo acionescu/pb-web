@@ -1,0 +1,39 @@
+<html>
+      <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+        <script type='text/javascript'>
+          google.load('visualization', '1', {'packages': ['geochart']});
+          google.setOnLoadCallback(drawMap);
+    
+          function drawMap() {
+            var data = google.visualization.arrayToDataTable([
+              ['State', 'Population', 'Area(km²)'],
+              ['RO-AB', 10569100, 35752],
+              ['DE-BY', 12519600, 70549],
+              ['DE-BE', 3375200, 892],
+              ['DE-BB', 2449500, 29477],
+              ['DE-HB', 654800, 404], 
+              ['DE-HH', 1734300, 755],
+              ['DE-HE', 6016500, 21115],
+              ['DE-MV', 1600300, 23174],
+              ['DE-NI', 7779000, 47618],
+              ['DE-NW', 17554300, 34043],
+              ['DE-RP', 3990300, 19847],
+              ['DE-SL', 994300, 2569],
+              ['DE-SN', 4050200, 18416],
+              ['DE-ST', 2259400, 20445],
+              ['DE-SH', 2806500, 15763],
+              ['DE-TH', 2170500, 16172]
+            ]);
+     
+            var geochart = new google.visualization.GeoChart(document.getElementById('chart_div'));
+    
+            geochart.draw(data, {width: 1024, height: 640, region: "RO", resolution: "provinces"});
+          };
+        </script>
+      </head>
+      <body>
+        <div id="chart_div"></div>
+      </body>
+</html>

@@ -1,5 +1,4 @@
 <div id="mapid" style="width: 80%; margin: auto; height: 600px;"></div>
-
 <div style="width: 100%; height: 400px;"></div>
 <script>
     console.log("load traffic page");
@@ -7,7 +6,23 @@
     var mymap;
 
     function initMap() {
-	mymap = L.map('mapid').setView([ 44.4361414, 26.1027202 ], 11);
+	
+	 
+	 var currentFilters = PB.filtersListToObject(getFiltersValues());
+	 
+	var osmData = filtersController.getDataForFieldValue("osmId",currentFilters["osmId"]); 
+	log("init map with osmData "+JSON.stringify(osmData)); 
+	
+	var centerCoords= [ 44.4361414, 26.1027202 ];
+	
+	if(osmData != null){
+	    var cpData = osmData.center_point;
+	    if(cpData != null && cpData.coordinates){
+	    	centerCoords = [cpData.coordinates[1],cpData.coordinates[0]];
+	    }
+	}
+	 
+	mymap = L.map('mapid').setView(centerCoords, 11);
 
 	L
 		.tileLayer(
@@ -20,7 +35,7 @@
 			    id : 'mapbox.streets'
 			}).addTo(mymap);
 
-	PB.MODULES.GEO.getTrafficDensity({});
+	PB.MODULES.GEO.getTrafficDensity(currentFilters);
 
 	// 	L.marker([ 51.5, -0.09 ]).addTo(mymap).bindPopup(
 	// 		"<b>Hello world!</b><br />I am a popup.").openPopup();
@@ -145,5 +160,21 @@
 		JSUTIL.injectScriptToHead("./tp/leaflet.polylineDecorator.js",
 			initMap);
 	    });
+    
+var self=this;    
+/* section controller */
+
+PB.sectionController={
+
+	refreshSection:function(filtersValues){
+	   	mymap.remove();
+		self.initMap();
+	}
+};
+
+// PB.refreshCurrentSection(null);
+    
+    
+    
 </script>
 

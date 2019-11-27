@@ -192,7 +192,7 @@
 	var sHeader = $("#sectionsHeader");
 	// 	var sc = $("#sections");
 
-	var about = $("#harta_trafic");
+	var about = $("#despre");
 
 	var sArray = [];
 
@@ -236,14 +236,28 @@
 			    $("#contentFilters").hide();
 			}
 			
-			initInfiniteScroll(getSectionRefreshFunction(cid, 10));
+			/* set page descpription */
 			$("#contentDesc").html(sData.desc);
-
-			PB.pbAgent.refreshSection({
-			    sectionId : cid,
-			    startItem : 0,
-			    itemCount : 10
-			});
+			
+			/* viewTypeconfig */
+			var viewTypeConfig;
+			if(sData.type != null){
+			    viewTypeConfig = PB.getViewTypeConfig(sData.type);
+			}
+			
+			if(viewTypeConfig != null && viewTypeConfig.page != null){
+				$("#contentBody").load(
+					"./client/"+viewTypeConfig.page, 'f' + (Math.random()*1000000));
+			}
+// 			else{
+// 				initInfiniteScroll(getSectionRefreshFunction(cid, 10));
+	
+// 				PB.pbAgent.refreshSection({
+// 				    sectionId : cid,
+// 				    startItem : 0,
+// 				    itemCount : 10
+// 				});
+// 		    	}
 		    } else {
 			$("#contentFilters").hide();
 			
@@ -289,26 +303,29 @@
     }
     
     function refreshCurrentSection(){
-	$("#contentBody").empty();
+	
 	/* reset last filters values */
 	lastRefreshFilters={};
 	var filtersValues = getFiltersValues();
-	/* remove old scroll */
-	removeInfiniteScroll();
+	log("refreshing current section");
+	PB.refreshCurrentSection(filtersValues);
 	
-	/* make sure we set refreshing flag on, so that scroll listener won't try to refresh the page as well */
-	sectionRefreshing=true;
+// 	/* remove old scroll */
+// 	removeInfiniteScroll();
 	
-	log("refresh with filters: "+filtersValues);
-	PB.pbAgent.refreshSection({
-	    sectionId : currentSectionData.id,
-	    startItem : 0,
-	    itemCount : 10,
-	    filtersList: filtersValues
-	});
+// 	/* make sure we set refreshing flag on, so that scroll listener won't try to refresh the page as well */
+// 	sectionRefreshing=true;
 	
-	/* init scroll with new filters */
-	initInfiniteScroll(getSectionRefreshFunction(currentSectionData.id, 10, filtersValues));
+// 	log("refresh with filters: "+filtersValues);
+// 	PB.pbAgent.refreshSection({
+// 	    sectionId : currentSectionData.id,
+// 	    startItem : 0,
+// 	    itemCount : 10,
+// 	    filtersList: filtersValues
+// 	});
+	
+// 	/* init scroll with new filters */
+// 	initInfiniteScroll(getSectionRefreshFunction(currentSectionData.id, 10, filtersValues));
 	
 	$("#sfBtn").attr("disabled",true);
     }
@@ -375,8 +392,6 @@
 	    	});
 	    }
 	}
-	
-	
 	
 	if(filtersE.children().length > 0){
 	    var btnCont= $("<div>").addClass("filterCont");
@@ -500,7 +515,7 @@
 	<a class="toggle-nav" href="#">&#9776;</a>
 	<nav class="menu">
 		<ul id="sectionsHeader" class="active">
-			<li id="harta_trafic"><a href="#harta_trafic">Hartă trafic</a></li>
+<!-- 			<li id="harta_trafic"><a href="#harta_trafic">Hartă trafic</a></li> -->
 <!-- 			<li id="harta_sesizari"><a href="#harta_sesizari">Hartă sesizări</a></li> -->
 			<li id="despre"><a href="#despre">Despre</a></li>
 			<li id="toc"><a href="#toc">Termeni și condiții</a></li>
@@ -515,12 +530,6 @@
 		<div id="contentFilters" class="sectionFilterns" hidden></div>
 		<div id="contentBody" class="sectionContent"></div>
 	</div>
-
-	<!-- 	<div id="sections" class="sectionsTabs"> -->
-	<!-- 		<ul id="sectionsHeader"> -->
-
-	<!-- 		</ul> -->
-	<!-- 	</div> -->
 
 	<div id="nTemplate" class="notification" hidden="true">
 		<div class="notifHeader"></div>

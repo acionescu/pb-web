@@ -12,6 +12,10 @@ if (PB.MODULES.GEO == null) {
 	},
 
 	getTrafficDensity : function(req) {
+	    if(req.daysOfWeek != null){
+		req.daysOfWeek = [req.daysOfWeek];
+	    }
+	    log("Get traffic density for request: "+JSON.stringify(req));
 	    PB.pbAgent.send({
 		et : "GEO:GET:TRAFFIC_DENSITY",
 		data : req

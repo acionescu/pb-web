@@ -241,6 +241,26 @@ DataFieldController.prototype.getUiValue=function(){
     return this.elem.val();
 }
 
+/* gets the data behind a value */
+DataFieldController.prototype.getValueData=function(valueId){
+    log("get value data for field "+this.df.id+" with value "+valueId);
+    if(valueId == null){
+	return null;
+    }
+    if(this.df.allowedValues != null){
+	var out;
+	this.df.allowedValues.forEach(function(vdf){
+//	    log("check value data "+vdf.id +" vs "+valueId);
+	    if(vdf.id.toString()===valueId.toString()){
+		out = vdf.value;
+		return;
+	    }
+	});
+	return out;
+    }
+    return null;
+}
+
 function FormDataController(dataFields){
     /* fields controllers */
     this.fields={};
@@ -276,8 +296,6 @@ FormDataController.prototype.initFromDataFields=function(dataFields){
     }
 }
 
-
-
 /* make this act as a DataContext */
 FormDataController.prototype.getFieldValue=function(fieldId){
     log("get field value "+fieldId);
@@ -285,6 +303,17 @@ FormDataController.prototype.getFieldValue=function(fieldId){
    
     if(fc != null && fc.ready && fc.showing){
 	return fc.getUiValue();
+    }
+    return null;
+}
+
+FormDataController.prototype.getDataForFieldValue=function(fieldId,fieldValue){
+    
+    var fc = this.fields[fieldId];
+   
+    if(fc != null && fc.ready && fc.showing){
+	return fc.getValueData(fieldValue);
+	
     }
     return null;
 }
@@ -347,8 +376,19 @@ var CONDITIONS=CONDITIONS || {
 
 var PB=PB || {
     MODULES:{},
+    VIEWS:{
+	TYPES:{
+	    "MapAppSection":{
+		page:"harta_trafic.html"
+	    },
+	    "UserEntitiesAppSection":{
+		page:"entities_list.html"
+	    }
+	}
+    },
     /* the client agent used to communicate with the server */
     pbAgent:null,
+    sectionController:null,
     logging:true
 };
 
@@ -358,12 +398,34 @@ PB.initModules = function(data){
     }
 }
 
+PB.getViewTypeConfig=function(viewType){
+    var viewTypeConfig = PB.VIEWS.TYPES[viewType];
+    return viewTypeConfig;
+}
+
+PB.refreshCurrentSection=function(filtersValues){
+    var sc = PB.sectionController;
+    if(sc != null && sc.refreshSection != null){
+	sc.refreshSection(filtersValues);
+    }
+}
+
 PB.testCondition=function(cond, dataContext){
     var cf = CONDITIONS[cond.type];
     if(cf != null){
 	return cf(cond,dataContext);
     }
     return false;
+}
+
+PB.filtersListToObject=function(filtersList){
+    var out ={};
+    if(filtersList != null){
+	filtersList.forEach(function(f){
+	   out[f.fieldValue.id]=f.fieldValue.value; 
+	});
+    }
+    return out;
 }
 
 PB.getDparamValue=function(pConfig, dataContext){
@@ -393,6 +455,8 @@ PB.dataFieldsToInputs={
 		
 		if(data != null){
 		    values = data.allowedValues;
+		    /* cache values */
+		    this.df.allowedValues = values;
 		}
 		
 		
@@ -406,7 +470,9 @@ PB.dataFieldsToInputs={
 		    }
 		}
 		
-		
+		if(this.df.value != null){
+		    this.elem[0].value = this.df.value;
+		}
 		
 	    },
 	    c.getUiValue = function(){

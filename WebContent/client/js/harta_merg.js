@@ -1,9 +1,26 @@
-<div id="mapid" style="width: 80%; margin: auto; height: 600px;"></div>
-<div style="width: 100%; height: 400px;"></div>
-<script>
-    console.log("load traffic page");
+  console.log("load traffic page");
 
     var mymap;
+    
+    var mapObjects={
+	    "Zonă de plecare":{
+		color: '#30f',
+		opacity:0.2
+	    },
+	    "Zonă de sosire":{
+		color:'#f03',
+		opacity:0.2
+	    },
+	    "Trafic redus":{
+		color: 'green'
+	    },
+	    "Trafic ridicat":{
+		color: 'orange'
+	    },
+	    "Trafic intens":{
+		color: 'red'
+	    }
+    };
 
     function initMap() {
 	
@@ -50,7 +67,29 @@
 	// 		.addTo(mymap).bindPopup("I am a polygon.");
 
 	// 	var popup = L.popup();
+	
+	
+	var legend = L.control({position: 'topright'});
+
+	legend.onAdd = function (map) {
+
+	    var div = L.DomUtil.create('div', 'info legend');
+	    
+
+	    // loop through our density intervals and generate a label with a colored square for each interval
+	    log("Shwo legend "+mapObjects);
+	    for (var moid in mapObjects) {
+		log("show legend for "+moid);
+		var mo = mapObjects[moid];
+	        div.innerHTML +='<i style="background:'+mo.color+'; opacity:'+mo.opacity+';">'+'&nbsp;&nbsp;&nbsp;&nbsp;'+'</i> '+moid+'<br>';
+	}
+
+	return div;
+	};
+
+	legend.addTo(mymap);
     }
+    
 
     function handleTrafficDensityData(ec) {
 	console.log("handle traffic data in page");
@@ -171,10 +210,4 @@ PB.sectionController={
 		self.initMap();
 	}
 };
-
-// PB.refreshCurrentSection(null);
-    
-    
-    
-</script>
 

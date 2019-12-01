@@ -379,7 +379,7 @@ var PB=PB || {
     VIEWS:{
 	TYPES:{
 	    "MapAppSection":{
-		page:"harta_trafic.html"
+		page:"harta_merg.html"
 	    },
 	    "UserEntitiesAppSection":{
 		page:"entities_list.html"

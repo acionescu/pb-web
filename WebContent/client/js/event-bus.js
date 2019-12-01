@@ -20,6 +20,7 @@ var EBUS = EBUS || {
 function WsState(name, handlers) {
     this.name;
     this.handlers = handlers;
+    this.extraHandlers={};
 }
 
 WsState.prototype = Object.create(WsState.prototype);
@@ -36,7 +37,29 @@ WsState.prototype.handle = function(ec) {
 	/* call it */
 	h(ec);
     }
+    
+    /* handle nested */
+    
+    var eh = this.extraHandlers[ec.event.et];
+    if(eh && eh.nh){
+	eh.nh.forEach(function(ehi) {
+		try {
+		    ehi(ec);
+		} catch (e) {
+		    self.log("error: " + e + "handler: " + ehi);
+		}
+	    });
+    }
+}
 
+WsState.prototype.registerHandler = function(et,h){
+    var eh = this.extraHandlers[et];
+    
+    if(eh == null){
+	eh = {"nh":[]};
+	this.extraHandlers[et]=eh;
+    }
+    eh.nh.push(h);
 }
 
 EBUS.WS.STATES.OPENED = new WsState("OPENED", {

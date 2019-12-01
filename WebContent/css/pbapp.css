@@ -3,6 +3,8 @@ html, body {
 	overflow-x: hidden;
 	font-family: sans-serif;
 	margin: 0px;
+	padding 0px;
+
 	/* 	padding: 2px; */
 }
 
@@ -100,6 +102,7 @@ button:disabled{
 .sectionContent {
 	margin: 0px;
 	padding: 0px;
+	height:100%;
 }
 
 .noContent{
@@ -178,9 +181,11 @@ button:disabled{
 	border-top: 1px solid #486666;
 	
 	display: grid;
-  	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  	grid-template-columns: repeat(auto-fit, minmax(300px, max-content));
   	grid-gap: 15px;
   	align-items: stretch;
+  	justify-content: center;
+  	align-content: start;
 }
 
 .filterBtn{

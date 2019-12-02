@@ -1,0 +1,37 @@
+<script>
+
+PB.sectionController={
+
+	refreshSection:function(filtersValues){
+	    	$("#contentBody").empty();
+		/* remove old scroll */
+		removeInfiniteScroll();
+		
+		/* make sure we set refreshing flag on, so that scroll listener won't try to refresh the page as well */
+		sectionRefreshing=true;
+		
+		log("refresh with filters: "+filtersValues);
+		PB.pbAgent.refreshSection({
+		    sectionId : currentSectionData.id,
+		    startItem : 0,
+		    itemCount : 10,
+		    filtersList: filtersValues
+		});
+		
+		/* init scroll with new filters */
+		initInfiniteScroll(getSectionRefreshFunction(currentSectionData.id, 10, filtersValues));
+	}
+};
+
+PB.refreshCurrentSection(null);
+
+// var cid =currentSectionData.id;
+// initInfiniteScroll(getSectionRefreshFunction(cid, 10));
+
+// 	PB.pbAgent.refreshSection({
+// 	    sectionId : cid,
+// 	    startItem : 0,
+// 	    itemCount : 10
+// 	});
+    
+</script>

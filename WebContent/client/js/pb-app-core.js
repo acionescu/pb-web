@@ -252,7 +252,9 @@ DataFieldController.prototype.getValueData=function(valueId){
 	this.df.allowedValues.forEach(function(vdf){
 //	    log("check value data "+vdf.id +" vs "+valueId);
 	    if(vdf.id.toString()===valueId.toString()){
-		out = vdf.value;
+//		log("value match "+JSON.stringify(vdf));
+//		out = vdf.value;
+		out = vdf;
 		return;
 	    }
 	});
@@ -310,7 +312,7 @@ FormDataController.prototype.getFieldValue=function(fieldId){
 FormDataController.prototype.getDataForFieldValue=function(fieldId,fieldValue){
     
     var fc = this.fields[fieldId];
-   
+    log("getDataForFieldValue fieldId="+fieldId+" fc="+fc);
     if(fc != null && fc.ready && fc.showing){
 	return fc.getValueData(fieldValue);
 	
@@ -384,6 +386,11 @@ var PB=PB || {
 	    "UserEntitiesAppSection":{
 		page:"entities_list.html"
 	    }
+	},
+	IDS:{
+	    "harta_sesizari":{
+		page:"harta_sesizari.html"
+	    }
 	}
     },
     /* the client agent used to communicate with the server */
@@ -400,6 +407,10 @@ PB.initModules = function(data){
 
 PB.getViewTypeConfig=function(viewType){
     var viewTypeConfig = PB.VIEWS.TYPES[viewType];
+    return viewTypeConfig;
+}
+PB.getViewTypeConfigById=function(viewId){
+    var viewTypeConfig = PB.VIEWS.IDS[viewId];
     return viewTypeConfig;
 }
 

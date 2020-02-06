@@ -208,7 +208,13 @@
 			
 			/* viewTypeconfig */
 			var viewTypeConfig;
-			if(sData.type != null){
+			log("Try to get view config for id "+sData.id);
+			if(sData.id != null){
+			    
+			    viewTypeConfig = PB.getViewTypeConfigById(sData.id);
+			}
+			
+			if(viewTypeConfig == null && sData.type != null){
 			    viewTypeConfig = PB.getViewTypeConfig(sData.type);
 			}
 			

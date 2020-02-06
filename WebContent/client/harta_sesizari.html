@@ -2,8 +2,34 @@
 
 <div style="width: 100%; height: 400px;"></div>
 <script>
+
+var mymap;
+
+var centerCoords;
+var geoQuery;
+
     function initMap() {
-	var mymap = L.map('mapid').setView([ 51.505, -0.09 ], 13);
+	geoQuery=null;
+	
+	var filterValues = getFiltersValues();
+	if(filterValues != null){
+		var currentFilters = PB.filtersListToObject(filterValues);
+		/* get selected areas data */
+		log("using filtersController "+filtersController);
+		var countyData = filtersController.getDataForFieldValue("~county",currentFilters["~county"]); 
+		var areaData = filtersController.getDataForFieldValue("~uat",currentFilters["~uat"]);
+		log("countyData="+countyData);
+		log("areaData="+areaData);
+		
+		if(areaData != null && countyData != null){
+		    log("refresh with county: "+JSON.stringify(countyData)+" ,uat: "+JSON.stringify(areaData));
+		    
+		    geoQuery=areaData.desc+", "+countyData.desc;
+		    
+		}	
+	}
+	
+	mymap = L.map('mapid').setView([45.9852129, 24.6859225], 7);
 
 	L
 		.tileLayer(
@@ -15,23 +41,70 @@
 				    + 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
 			    id : 'mapbox.streets'
 			}).addTo(mymap);
+	
+// 	getCenterPoint();
+	
+// 	L.marker([ 51.5, -0.09 ]).addTo(mymap).bindPopup(
+// 		"<b>Hello world!</b><br />I am a popup.").openPopup();
 
-	L.marker([ 51.5, -0.09 ]).addTo(mymap).bindPopup(
-		"<b>Hello world!</b><br />I am a popup.").openPopup();
+// 	L.circle([ 51.508, -0.11 ], 500, {
+// 	    color : 'red',
+// 	    fillColor : '#f03',
+// 	    fillOpacity : 0.5
+// 	}).addTo(mymap).bindPopup("I am a circle.");
 
-	L.circle([ 51.508, -0.11 ], 500, {
-	    color : 'red',
-	    fillColor : '#f03',
-	    fillOpacity : 0.5
-	}).addTo(mymap).bindPopup("I am a circle.");
+// 	L.polygon([ [ 51.509, -0.08 ], [ 51.503, -0.06 ], [ 51.51, -0.047 ] ])
+// 		.addTo(mymap).bindPopup("I am a polygon.");
 
-	L.polygon([ [ 51.509, -0.08 ], [ 51.503, -0.06 ], [ 51.51, -0.047 ] ])
-		.addTo(mymap).bindPopup("I am a polygon.");
-
-	var popup = L.popup();
+// 	var popup = L.popup();
     }
 
     JSUTIL.injectLinkToHead("https://unpkg.com/leaflet@1.5.1/dist/leaflet.css");
-    JSUTIL.injectScriptToHead("https://unpkg.com/leaflet@1.5.1/dist/leaflet.js",initMap);
+    JSUTIL.injectScriptToHead("https://unpkg.com/leaflet@1.5.1/dist/leaflet.js",pageRefresh);
+    
+    function getCenterPoint(){
+	/* set default center coords */
+	centerCoords=[45.9852129, 24.6859225];
+	
+	
+// 	var queryString = "România";
+// 	$.getJSON('http://nominatim.openstreetmap.org/search?format=geojson&limit=1&countrycodes=ro&q=' + queryString, function(data) {
+// 	    log("got geojson data "+JSON.stringify(data));
+// 	    if(data != null){
+// 		var coords = data.features[0].geometry.coordinates;
+// 		log("coords = "+coords);
+// 	    }
+// 	});
+    }
+    
+    function pageRefresh(filtersValues){
+	if(mymap != null){
+   		mymap.remove();
+    	}
+//		self.initMap();
+   	initMap();
+   	
+   	log("refresh "+currentSectionData.id+"with filters: "+filtersValues);
+	PB.pbAgent.refreshSection({
+	    sectionId : currentSectionData.id,
+	    startItem : 0,
+	    itemCount : 500,
+	    filtersList: filtersValues,
+	    extraParams: {"geoQuery": geoQuery}
+	});
+    }
+    
+    var self=this;    
+    /* section controller */
+
+    PB.sectionController={
+
+    	refreshSection:function(filtersValues){
+    		pageRefresh();
+    	}
+    };
+    
+//     PB.refreshCurrentSection(null);
+    
 </script>
 

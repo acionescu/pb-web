@@ -421,6 +421,16 @@ PB.refreshCurrentSection=function(filtersValues){
     }
 }
 
+PB.handleSectionData=function(data, defaultHandler){
+    var sc = PB.sectionController;
+    if(sc != null && sc.onSectionData != null){
+	sc.onSectionData(data);
+    }
+    else if(defaultHandler != null){
+	defaultHandler(data);
+    }
+}
+
 PB.testCondition=function(cond, dataContext){
     var cf = CONDITIONS[cond.type];
     if(cf != null){

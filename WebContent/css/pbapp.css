@@ -3,7 +3,8 @@ html, body {
 	overflow-x: hidden;
 	font-family: sans-serif;
 	margin: 0px;
-	padding 0px;
+	padding
+	0px;
 
 	/* 	padding: 2px; */
 }
@@ -32,37 +33,37 @@ button {
 	border-radius: 8px;
 }
 
-button:disabled{
-	background-color:gray;	
+button:disabled {
+	background-color: gray;
 }
 
 .select-style {
-    border: 1px solid #486666;
-    
-    border-radius: 8px;
-    overflow: hidden;
-    background: #F5F5DC url("data:image/png;base64,R0lGODlhDwAUAIABAAAAAP///yH5BAEAAAEALAAAAAAPABQAAAIXjI+py+0Po5wH2HsXzmw//lHiSJZmUAAAOw==") no-repeat 95% 50%;
+	border: 1px solid #486666;
+	border-radius: 8px;
+	overflow: hidden;
+	background: #F5F5DC
+		url("data:image/png;base64,R0lGODlhDwAUAIABAAAAAP///yH5BAEAAAEALAAAAAAPABQAAAIXjI+py+0Po5wH2HsXzmw//lHiSJZmUAAAOw==")
+		no-repeat 95% 50%;
 }
 
-.select-style:active{
+.select-style:active {
 	color: #486666;
 	background-color: #26b39a;
 }
 
 .select-style select {
-    padding: 5px 8px;
-    width: 130%;
-    border: none;
-    box-shadow: none;
-    background: transparent;
-    background-image: none;
-    -webkit-appearance: none;
+	padding: 5px 8px;
+	width: 130%;
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	background-image: none;
+	-webkit-appearance: none;
 }
 
 .select-style select:focus {
-    outline: none;
+	outline: none;
 }
-
 
 .header {
 	/* 		width: 100%; */
@@ -102,15 +103,14 @@ button:disabled{
 .sectionContent {
 	margin: 0px;
 	padding: 0px;
-	height:100%;
+	height: 100%;
 }
 
-.noContent{
+.noContent {
 	background-color: white;
 	color: gray;
 	font-size: large;
 	text-align: center;
-	
 	padding: 10px;
 }
 
@@ -128,18 +128,16 @@ button:disabled{
 	color: gray;
 	font-size: x-large;
 	text-align: center;
-	
 	padding: 10px;
 }
 
 .notification {
-	
 	border: 2px solid #bcd;
 	border-radius: 12px;
 	box-shadow: 0px 5px 10px #ddd;
 	margin-bottom: 20px;
-	margin-left: 5px; 
-	margin-right : 5px;
+	margin-left: 5px;
+	margin-right: 5px;
 }
 
 .notifHeader {
@@ -162,54 +160,99 @@ button:disabled{
 	
 }
 
-.notifStats{
+.notifStats {
 	background-color: #F5F5DC;
 	padding-left: 10px;
 	padding-right: 10px;
-	padding-top:5px;
-	padding-bottom:5px;
+	padding-top: 5px;
+	padding-bottom: 5px;
 	border-bottom: 1px solid #486666;
 }
 
-.statsItem{
+.statsItem {
 	color: gray;
 	margin-right: 0.4em;
 }
 
-.filtersContaier{
-	padding:10px;
+.filtersContaier {
+	padding: 10px;
 	border-top: 1px solid #486666;
-	
 	display: grid;
-  	grid-template-columns: repeat(auto-fit, minmax(300px, max-content));
-  	grid-gap: 15px;
-  	align-items: stretch;
-  	justify-content: center;
-  	align-content: start;
+	grid-template-columns: repeat(auto-fit, minmax(300px, max-content));
+	grid-gap: 15px;
+	align-items: stretch;
+	justify-content: center;
+	align-content: start;
 }
 
-.filterBtn{
+.filterBtn {
 	width: 100%;
 	height: 100%;
 }
 
-.filterCont{
-/* 	margin: 10px; */
+.filterCont {
+	/* 	margin: 10px; */
 	width: 100%;
-	
 }
 
 .filterTitle {
 	margin-bottom: 5px;
-	padding-left: 5px;	
+	padding-left: 5px;
 }
 
-.filterCont > select{
+.filterCont>select {
 	width: 100%;
 }
 
-.statsIcon{
+.statsIcon {
 	margin-right: 0.2em;
+}
+
+.issueDetailsContent {
+	max-height: 200px;
+}
+
+.issueDetailsFooter {
+	padding-top: 5pt;
+	margin-top: 5pt;
+	border-top: 1px solid gray;
+}
+
+/* jquery stuff */
+.ui-tabs .ui-tabs-panel {
+	display: block;
+	border-width: 0;
+	padding: 5pt;
+	background: none;
+	border-top: 1px solid gray;
+	overflow-y: auto;
+}
+
+.ui-tabs .ui-tabs-nav {
+	margin: 0;
+	padding: 0;
+}
+
+.ui-widget-header {
+	border: none;
+	background: none;
+	color: #333333;
+	font-weight: bold;
+}
+
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active,
+	a.ui-button:active, .ui-button:active, .ui-button.ui-state-active:hover
+	{
+	border: 1px solid #003eff;
+	border-bottom-width: 1px;
+	background: #486666;
+	font-weight: normal;
+	color: #ffffff;
+}
+
+/*lidl */
+.lidl-logo-img {
+	margin: 10pt;
 }
 
 @media only screen and (max-width:980px) {
@@ -236,15 +279,13 @@ button:disabled{
 		min-width: 80%;
 		font-size: 1.4em;
 	}
-	.select-style{
+	.select-style {
 		min-height: 1.4em;
 		font-size: 1.4em;
 	}
-	
-	button{
+	button {
 		font-size: 1.4em !important;
 	}
-	
 	.button {
 		font-size: 1.2empx !important;
 	}
@@ -264,4 +305,8 @@ button:disabled{
 	/* 	.notifBody { */
 	/* 		font-size: 1.2em !important; */
 	/* 	} */
+	.lidl-logo-img {
+		max-height: 90px;
+		width:auto;
+	}
 }

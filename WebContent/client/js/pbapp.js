@@ -65,7 +65,10 @@
 	},
 	"SECTION:NOTIFICATIONS:REFRESH" : function(ec) {
 
-	    refreshPublicUserDataSection(ec.event.data);
+//	    refreshPublicUserDataSection(ec.event.data);
+	    
+	    PB.handleSectionData(ec.event.data, refreshPublicUserDataSection);
+	    
 	    sectionRefreshing = false;
 	}
 	

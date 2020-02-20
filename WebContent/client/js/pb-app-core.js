@@ -396,7 +396,7 @@ var PB=PB || {
     /* the client agent used to communicate with the server */
     pbAgent:null,
     sectionController:null,
-    logging:true
+    logging:false
 };
 
 PB.initModules = function(data){

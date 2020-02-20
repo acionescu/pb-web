@@ -33,7 +33,7 @@
 	var centerCoords= [ 44.4361414, 26.1027202 ];
 	
 	if(osmData != null){
-	    var cpData = osmData.center_point;
+	    var cpData = osmData.value.center_point;
 	    if(cpData != null && cpData.coordinates){
 	    	centerCoords = [cpData.coordinates[1],cpData.coordinates[0]];
 	    }

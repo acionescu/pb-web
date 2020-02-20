@@ -1,37 +1,16 @@
 <div id="mapid" style="width: 80%; margin: auto; height: 600px;"></div>
 
-<div style="width: 100%; height: 400px;"></div>
-<script>
-    function initMap() {
-	var mymap = L.map('mapid').setView([ 51.505, -0.09 ], 13);
+<div style="color: gray; text-align: center; margin: 30pt 20%; font-size: 15pt;">
+<p>Notă: Sunt afișate doar sesizările pentru care a fost setată o locație GPS.</p>
 
-	L
-		.tileLayer(
-			'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
-			{
-			    maxZoom : 18,
-			    attribution : 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, '
-				    + '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, '
-				    + 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-			    id : 'mapbox.streets'
-			}).addTo(mymap);
+<p>Această secțiune a fost dezvoltată în cadrul proiectului "Panoul de Bord - Sesizări către Garda de Mediu", proiect ce face parte din programul "Cu apele curate" implementat cu sprijinul Lidl România. Programul reprezintă un apel la implicare în combaterea și prevenirea poluării cu plastic a apelor Dunării, adresat membrilor comunităților și autorităților publice din localitățile dunărene.</p>
+</div>
 
-	L.marker([ 51.5, -0.09 ]).addTo(mymap).bindPopup(
-		"<b>Hello world!</b><br />I am a popup.").openPopup();
+<div style="width: 100%;">
 
-	L.circle([ 51.508, -0.11 ], 500, {
-	    color : 'red',
-	    fillColor : '#f03',
-	    fillOpacity : 0.5
-	}).addTo(mymap).bindPopup("I am a circle.");
+<img style="float:right; margin: 10pt; margin-left: 4pt;" class="lidl-logo-img" src="./images/logo_csr_lidl.png">
+<img style="float:right; margin: 10pt; margin-right: 4pt;" class="lidl-logo-img" src="./images/logo_lidl_01.png">
+<img style="float:left; margin: 10pt;" class="lidl-logo-img" src="./images/logo_cuapelecurate_01.png">
 
-	L.polygon([ [ 51.509, -0.08 ], [ 51.503, -0.06 ], [ 51.51, -0.047 ] ])
-		.addTo(mymap).bindPopup("I am a polygon.");
-
-	var popup = L.popup();
-    }
-
-    JSUTIL.injectLinkToHead("https://unpkg.com/leaflet@1.5.1/dist/leaflet.css");
-    JSUTIL.injectScriptToHead("https://unpkg.com/leaflet@1.5.1/dist/leaflet.js",initMap);
-</script>
-
+</div>
+<script src="./client/js/min/harta_sesizari.js"></script>

@@ -19,6 +19,7 @@
 <script src="./client/js/pb-app-core.js"></script>
 <script src="./client/js/util.js"></script>
 <script src="./client/js/pb-app-geo.js"></script>
+<script src="./client/js/pb-app-auth.js"></script>
 <script src="./tp/jquery-2.1.1.js"></script>
 
 <script src="./tp/jquery-ui.js"></script>
@@ -28,7 +29,7 @@
 <link rel="stylesheet" href="./css/pbapp.css?v=1.8">
 <link rel="stylesheet" href="./css/nav.css?v=1.4">
 <link rel="stylesheet" href="./css/fa-all.css">
-
+<link rel="stylesheet" href="./css/menubar.css">
 
 <script src="./client/js/pbapp.js"></script>
 
@@ -58,10 +59,17 @@
 	<a class="toggle-nav" href="#">&#9776;</a>
 	<nav class="menu">
 		<ul id="sectionsHeader" class="active">
-<!-- 			<li id="harta_trafic"><a href="#harta_trafic">Hartă trafic</a></li> -->
-<!-- 			<li id="harta_sesizari"><a href="#harta_sesizari">Hartă sesizări</a></li> -->
 			<li id="despre"><a href="#despre">Despre</a></li>
 			<li id="toc"><a href="#toc">Termeni și condiții</a></li>
+			<li id="login"><a href="#login">Login</a></li>
+			<div id="account" class="dropdown" hidden>
+					<a class="dropbtn">
+						Cont <i class="fa fa-caret-down"></i>
+					</a>
+					<div class="dropdown-content">
+					<a id="logout" href="#logout">Logout</a> 
+				</div>
+			</div>
 		</ul>
 
 

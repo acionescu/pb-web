@@ -399,6 +399,12 @@ var PB=PB || {
     logging:true
 };
 
+function log(message) {
+	if(PB.logging){
+		console.log(message);
+	}
+}
+
 PB.initModules = function(data){
     for(var mid in PB.MODULES){
 	PB.MODULES[mid].init(data);

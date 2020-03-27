@@ -1,4 +1,5 @@
 var JSUTIL = JSUTIL || {
+    INTERVALS:{},
     
     injectLinkToHead:function(url){
 	var link = document.createElement( "link" );
@@ -141,7 +142,50 @@ var JSUTIL = JSUTIL || {
 	    });
 	    
 	    return JSUTIL.getShortestSegment(ip1,ip2);
-	}
+	},
 	
-    
+	timeIntervalToText:function(ti,divisions, divisionNames){
+	    if(ti == null || ti <= 0){
+		return "";
+	    }
+	    
+	    var resArray=[];
+	    var rest = ti;
+	    
+	    var out ="";
+	    
+	    for(var i in divisions){
+		var d = divisions[i];
+		
+		var cv = Math.floor(rest / d);
+		
+		if(resArray.length > 0){
+		    resArray[resArray.length - 1] -= cv*d;
+		}
+		rest = cv;
+		
+		resArray.push(rest);
+	    }
+	    
+	    for(var i in divisionNames){
+		out = resArray[i]+""+divisionNames[i]+" "+out;
+	    }
+	    
+	   return out;
+	},
+	
+	setInterval: function(name, f, delay){
+            var i = setInterval(f,delay);
+            this.INTERVALS[name]=i;
+        },
+        clearInterval:function(name){
+            var i = this.INTERVALS[name];
+            if(i){
+        	clearInterval(i);
+            }
+            this.INTERVALS[name]=null;
+        },
+        isIntervalStarted:function(name){
+            return (this.INTERVALS[name] != null);
+        }
 }

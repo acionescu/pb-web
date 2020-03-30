@@ -33,7 +33,12 @@ if (PB.MODULES.AUTH == null) {
 			   
 			}
 		    }),
-	    REMOTE_AUTH_CONFIRMED : new WsState("REMOTE_AUTH_CONFIRMED", {}),
+	    REMOTE_AUTH_CONFIRMED : new WsState("REMOTE_AUTH_CONFIRMED", {
+		"REMOTE:AUTH:RELEASED": function(ec){
+		    PB.MODULES.AUTH.reset();
+		    handleSessionExpired();
+		}
+	    }),
 	    REQUESTING_RELEASE : new WsState("REQUESTING_RELEASE", {
 		"REMOTE:AUTH:RELEASED": function(ec){
 		    PB.MODULES.AUTH.reset();
@@ -79,9 +84,8 @@ if (PB.MODULES.AUTH == null) {
 	},
 
 	requestAuth : function(req) {
-
 	    log("Request user auth: " + JSON.stringify(req));
-	    this.STATE = this.STATES.REQUESTING_AUTH;
+	    PB.MODULES.AUTH.gotoState(PB.MODULES.AUTH.STATES.REQUESTING_AUTH);
 	    PB.pbAgent.send({
 		et : "USER:AUTH:REQUEST",
 		data : req
@@ -103,6 +107,10 @@ if (PB.MODULES.AUTH == null) {
 	reset : function() {
 	    this.STATE = null;
 	    this.DATA = {};
+	    
+	    /* clear timers */
+	    JSUTIL.clearInterval("authInitTimer");
+	    JSUTIL.clearInterval("authConfirmTimer");
 	}
     };
     
@@ -131,41 +139,61 @@ if (PB.MODULES.AUTH == null) {
 	      log("actionId="+data.actionId);
 	      
 	      $("#msgCont").html("Scanează codul QR de mai jos, cu aplicația de mobil <a href='https://segoia.ro#apps'>Panoul de Bord</a>, pentru a te autentifica.")
-	      
-	      if(!JSUTIL.isIntervalStarted("authInitInt")){
-        	      var delay =1000;
-        	      var timelapse=0;
-        	      var startTime = new Date().getTime();
-        	      var remained = data.userAuthInitTimeout;
-        	      	      
-        	      var updateFunc = function(){
-        		  
-        		  if(remained <= 0){
-        		      JSUTIL.clearInterval("authInitInt");
-        		      
-        		  }
-        		  
-        		  remained = data.userAuthInitTimeout -  (new Date().getTime()-startTime);
-                	      var duration = JSUTIL.timeIntervalToText(remained,[1000,60],["s","m"]);
-                	      log("auth init timeout: "+data.userAuthInitTimeout);
-                	      $("#postMsgCont").html("Timp rămas: "+duration);
-        	      }
-        	      updateFunc();
-        	      
-        	      JSUTIL.setInterval("authInitInt",updateFunc, delay);
+	      $("#postMsgCont").empty().show();
+	      if(!JSUTIL.isIntervalStarted("authInitTimer")){
+		  
+		  startTimer("authInitTimer",1000, data.userAuthInitTimeout, function(name, remained){
+		      var duration = JSUTIL.timeIntervalToText(remained,[1000,60],["s","m"]);
+        	      $("#postMsgCont").html("Timp rămas: "+duration); 
+		  });
 	      }
 	  }
 	  
+	  function startTimer(name,delay,totalTime,callback ){
+	      var startTime = new Date().getTime();
+	      var remained = totalTime
+	      	      
+	      var updateFunc = function(){
+		  
+		  remained = totalTime -  (new Date().getTime()-startTime);
+		  
+		  if(remained <= 0){
+		      JSUTIL.clearInterval(name);
+		  }
+		  
+		  callback(name,remained);
+        	     
+	      }
+	      updateFunc();
+	      
+	      JSUTIL.setInterval(name,updateFunc, delay);
+	  }
+	  
 	  function handleRemoteAuthInit(data){
+	      /* clear init timer */
+	      JSUTIL.clearInterval("authInitTimer");
+	      
+	      $("#msgCont").html("Introdu codul de mai jos în aplicația de mobil pentru a confirma autentificarea.");
 	      
 	      var passCode = data.authCode;
 	      var pcc = $("#passCodeCont");
 	      pcc.show();
 	      pcc.html(passCode);
-	      $("#qrcode").hide();
+	      $("#qrcode").empty().hide();
+	      
+	      if(!JSUTIL.isIntervalStarted("authConfirmTimer")){
+		  
+		  startTimer("authConfirmTimer",1000, data.userAuthConfirmTimeout, function(name, remained){
+		      var duration = JSUTIL.timeIntervalToText(remained,[1000,60],["s","m"]);
+        	      $("#postMsgCont").html("Timp rămas: "+duration); 
+		  });
+	      }
 	  }
 	  
 	  function handleRemoteAuthConfirmed(data){
+	      /* clear auth confirm timer */
+	      JSUTIL.clearInterval("authConfirmTimer");
+	      
 	      $("#msgCont").html("Autentificare cu succes!");
 	      $("#qrcode").hide();
 	      $("#passCodeCont").hide();
@@ -175,12 +203,13 @@ if (PB.MODULES.AUTH == null) {
 	      
 	      sections.find("#account").show();      
 	      
+	      $("#postMsgCont").empty().hide();
+	      
 	  }
 	  
 	  function handleLogout(){
 	      var sections = $("#sectionsHeader");
 	      sections.find("#login").show();
-	      
 	      sections.find("#account").hide();      
 	  }
 	  
@@ -188,8 +217,37 @@ if (PB.MODULES.AUTH == null) {
 	      PB.MODULES.AUTH.reset();
 	      $("#qrcode").empty();
 	      $("#postMsgCont").empty();
-	      $("#msgCont").html("Timpul a expirat. <a onclick=PB.MODULES.AUTH.requestAuth()>Încearcă din nou</a>.");
+	      $("#postMsgCont").hide();
+	      $("#msgCont").html("Timpul a expirat. <a href='#login' onclick=PB.MODULES.AUTH.requestAuth()>Încearcă din nou</a>.");
 	      
+	  }
+	  
+	  function handleSessionExpired(ec){
+	      var sections = $("#sectionsHeader");
+	      sections.find("#login").show();
+	      sections.find("#account").hide();     
+	      
+	      var de = $( "#dialog-confirm" );
+	      de.attr('title',"Sesiunea a expirat");
+	      de.html("<p>Cum vrei să continui?</p>")
+	      de.dialog({
+		      resizable: false,
+		      height: "auto",
+		      width: 400,
+		      modal: true,
+		      buttons: {
+		        "Autentificare": function() {
+		          $( this ).dialog( "close" ).hide();
+//		          window.location.hash = '#login';
+//		          PB.MODULES.AUTH.requestAuth({});
+		          $("#login").click();
+		        },
+		        "Închide": function() {
+		          $( this ).dialog( "close" ).hide();
+		        }
+		      }
+		    });
+	      de.show();
 	  }
 
 }

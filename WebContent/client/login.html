@@ -70,7 +70,6 @@ function getRandomNumbers() {
       log("currentState = "+PB.MODULES.AUTH.STATE);
       if(PB.MODULES.AUTH.STATE == null){
       
-	  PB.MODULES.AUTH.gotoState(PB.MODULES.AUTH.STATES.REQUESTING_AUTH);
 	/* send auth request */
       	PB.MODULES.AUTH.requestAuth({});
 	log("state = "+ PB.MODULES.AUTH.STATE);

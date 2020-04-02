@@ -237,6 +237,7 @@
 	}
 
     function initSections(data) {
+	PB.initData = data;
 	PB.initModules(data);
 	
 	var sHeader = $("#sectionsHeader");
@@ -478,8 +479,9 @@
 	    $("#contentBody").html("<div class='noContent'>Nu există înregistrări</div>");
 	}
     }
-
-    startTest(getTargetUrl("/ogeg/ws/web/v0/events"));
+    
+//    startTest(getTargetUrl("/ogeg/ws/web/v0/events"));
+    startTest(getTargetUrl("/pb-web/ws/web/v0/events"));
     
 //    startTest("wss://panouldebord.ro/ogegmob/ws/web/v0/events");
     

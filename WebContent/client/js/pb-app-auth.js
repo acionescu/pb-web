@@ -196,7 +196,7 @@ if (PB.MODULES.AUTH == null) {
 	      
 	      $("#msgCont").html("Autentificare cu succes!");
 	      $("#qrcode").hide();
-	      $("#passCodeCont").hide();
+	      $("#passCodeCont").empty().hide();
 	      
 	      var sections = $("#sectionsHeader");
 	      sections.find("#login").hide();
@@ -211,6 +211,7 @@ if (PB.MODULES.AUTH == null) {
 	      var sections = $("#sectionsHeader");
 	      sections.find("#login").show();
 	      sections.find("#account").hide();      
+	      PB.goHome();
 	  }
 	  
 	  function handleSessionCanceled(ec){
@@ -218,6 +219,7 @@ if (PB.MODULES.AUTH == null) {
 	      $("#qrcode").empty();
 	      $("#postMsgCont").empty();
 	      $("#postMsgCont").hide();
+	      $("#passCodeCont").empty().hide();
 	      $("#msgCont").html("Timpul a expirat. <a href='#login' onclick=PB.MODULES.AUTH.requestAuth()>Încearcă din nou</a>.");
 	      
 	  }

@@ -396,6 +396,7 @@ var PB=PB || {
     /* the client agent used to communicate with the server */
     pbAgent:null,
     sectionController:null,
+    initData:null,
     logging:true
 };
 
@@ -531,3 +532,12 @@ PB.getDataFieldController=function(df){
     }
     return null;
 }
+
+PB.goHome= function(){
+	var firstSectionId = PB.initData.defaultSection;
+	if(firstSectionId == null){
+	    firstSectionId = PB.initData.sections[0].id;
+	}
+	log("going home to section "+firstSectionId);
+	$("#"+firstSectionId).click();
+    }

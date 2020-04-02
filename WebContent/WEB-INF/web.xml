@@ -10,4 +10,22 @@
 <!--     <welcome-file>default.jsp</welcome-file> -->
 <welcome-file>/client/pbapp.html</welcome-file>
   </welcome-file-list>
+   <session-config>
+      <session-timeout>-1</session-timeout>
+   </session-config>
+   <listener>
+      <listener-class>net.segoia.eventbus.events.web.util.SessionLifecycleToEventListener</listener-class>
+   </listener>
+    <filter>
+      <filter-name>reqToEventFilter</filter-name>
+      <filter-class>net.segoia.eventbus.events.web.util.RequestToEventFilter</filter-class>
+   </filter>
+   <servlet>
+      <servlet-name>oauth2callback</servlet-name>
+      <servlet-class>net.segoia.ogeg.oauth2.callback.Oauth2CallbackServlet</servlet-class>
+   </servlet>
+   <filter-mapping>
+      <filter-name>reqToEventFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+   </filter-mapping>
 </web-app>

@@ -2,10 +2,18 @@ package net.segoia.pbweb.server;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.segoia.event.conditions.Condition;
+import net.segoia.event.conditions.OrCondition;
+import net.segoia.event.conditions.StrictSourceAliasMatchCondition;
+import net.segoia.event.conditions.StrictSourceTypeMatchCondition;
 import net.segoia.event.eventbus.CustomEventContext;
+import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.peers.CustomEventHandler;
 import net.segoia.event.eventbus.peers.GlobalEventNodeAgent;
 import net.segoia.event.eventbus.peers.events.NewPeerEvent;
@@ -16,10 +24,15 @@ import net.segoia.util.logging.MasterLogManager;
 
 public class ParallelProxyClient extends GlobalEventNodeAgent {
     private static Logger logger = MasterLogManager.getLogger(ParallelProxyClient.class.getSimpleName());
+
+    private String serverAlias;
+
     /* client to remote node */
     private WsClientEndpointTransceiver targetServerClient;
 
     private ProxiedServerNodeController serverNodeController;
+    
+    private String serverPeerId;
 
     private Map<String, ProxiedClientNodeController> clientsControllers = new HashMap<>();
 
@@ -29,9 +42,12 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
      * the types of client peer that we should proxy
      */
     private String[] acceptedClientTypes;
+    
+    private Deque<Event> pendingClientEvents = new ArrayDeque<>(1000);
 
     public ParallelProxyClient(String uri, String... acceptedClientTypes) {
 	this.acceptedClientTypes = acceptedClientTypes;
+	this.serverAlias = uri;
 	try {
 	    targetServerClient = new WsClientEndpointTransceiver(new URI(uri), "WSS_WEB_V0");
 	} catch (URISyntaxException e) {
@@ -47,8 +63,33 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
 
     @Override
     protected void registerHandlers() {
-	context.addEventHandler(NewPeerEvent.class, (c) -> {
-	    System.out.println("We a new peer " + c.getEvent().toJson());
+	FilteringEventBus serverBus = context.getEventBusForCondition(new StrictSourceAliasMatchCondition(serverAlias));
+
+	Condition[] clientTypesCond = new Condition[acceptedClientTypes.length];
+	int i = 0;
+	for (String act : acceptedClientTypes) {
+	    clientTypesCond[i++] = new StrictSourceTypeMatchCondition(act);
+	}
+
+	FilteringEventBus clientsBus = context.getEventBusForCondition(new OrCondition(clientTypesCond));
+
+//	/* new server connection */
+//	serverBus.addEventHandler(NewPeerEvent.class, (c) -> {
+//	    handleTargetServerConnection(c);
+//	});
+//	
+//	clientsBus.addEventHandler(NewPeerEvent.class, (c) -> {
+//	    handleNewClientPeer(c);
+//	});
+	
+	
+	context.addEventHandler(NewPeerEvent.class, (c)->{
+	    String sourceType = c.getEvent().getHeader().getSourceType();
+	    System.out.println("new peer "+sourceType);
+	    CustomEventHandler<NewPeerEvent> h = newPeerHandlersByType.get(sourceType);
+	    if(h != null) {
+		h.handleEvent(c);
+	    }
 	});
 
     }
@@ -71,20 +112,45 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
     }
 
     protected void handleTargetServerConnection(CustomEventContext<NewPeerEvent> c) {
+	
 	serverNodeController = new ProxiedServerNodeController();
+	serverPeerId = c.getEvent().getData().getPeerId();
+	System.out.println("Server is connected "+serverPeerId);
+	processPendingEvents();
     }
 
     protected void handleNewClientPeer(CustomEventContext<NewPeerEvent> c) {
 	NewPeerEvent event = c.getEvent();
 	String peerId = event.getData().getPeerId();
-	if(clientsControllers.containsKey(peerId)) {
+	if (clientsControllers.containsKey(peerId)) {
 	    /* ups we already have a client with this id */
-	    logger.error("Got new peer event, but peer id already existed: "+peerId);
+	    logger.error("Got new peer event, but peer id already existed: " + peerId);
 	    return;
 	}
-	
+
 	clientsControllers.put(peerId, new ProxiedClientNodeController());
-	
+
+	handleClientEvent(new Event("GOT:REMOTE:PEER"));
+    }
+    
+    private void processPendingEvents() {
+	while(!pendingClientEvents.isEmpty()) {
+	    sendToServer(pendingClientEvents.poll());
+	}
+    }
+    
+    private void sendToServer(Event event) {
+	System.out.println("sending event to server "+event.toJson());
+	 context.forwardTo(event, serverPeerId);
+    }
+    
+    private void handleClientEvent(Event e) {
+	if(serverPeerId != null) {
+	    sendToServer(e);
+	}
+	else {
+	    pendingClientEvents.offer(e);
+	}
     }
 
     @Override

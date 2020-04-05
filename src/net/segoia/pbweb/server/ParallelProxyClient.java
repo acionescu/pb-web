@@ -16,7 +16,7 @@ import net.segoia.event.eventbus.Event;
 import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.peers.CustomEventHandler;
 import net.segoia.event.eventbus.peers.GlobalEventNodeAgent;
-import net.segoia.event.eventbus.peers.events.NewPeerEvent;
+import net.segoia.event.eventbus.peers.events.PeerAcceptedEvent;
 import net.segoia.event.eventbus.peers.vo.bind.ConnectToPeerRequest;
 import net.segoia.eventbus.web.ws.v0.WsClientEndpointTransceiver;
 import net.segoia.util.logging.Logger;
@@ -31,18 +31,18 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
     private WsClientEndpointTransceiver targetServerClient;
 
     private ProxiedServerNodeController serverNodeController;
-    
+
     private String serverPeerId;
 
     private Map<String, ProxiedClientNodeController> clientsControllers = new HashMap<>();
 
-    private Map<String, CustomEventHandler<NewPeerEvent>> newPeerHandlersByType = new HashMap<>();
+    private Map<String, CustomEventHandler<PeerAcceptedEvent>> newPeerHandlersByType = new HashMap<>();
 
     /**
      * the types of client peer that we should proxy
      */
     private String[] acceptedClientTypes;
-    
+
     private Deque<Event> pendingClientEvents = new ArrayDeque<>(1000);
 
     public ParallelProxyClient(String uri, String... acceptedClientTypes) {
@@ -81,16 +81,21 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
 //	clientsBus.addEventHandler(NewPeerEvent.class, (c) -> {
 //	    handleNewClientPeer(c);
 //	});
-	
-	
-	context.addEventHandler(NewPeerEvent.class, (c)->{
+
+	context.addEventHandler(PeerAcceptedEvent.class, (c) -> {
 	    String sourceType = c.getEvent().getHeader().getSourceType();
-	    System.out.println("new peer "+sourceType);
-	    CustomEventHandler<NewPeerEvent> h = newPeerHandlersByType.get(sourceType);
-	    if(h != null) {
+	    System.out.println("new peer " + sourceType);
+	    CustomEventHandler<PeerAcceptedEvent> h = newPeerHandlersByType.get(sourceType);
+	    if (h != null) {
 		h.handleEvent(c);
 	    }
 	});
+
+	clientsBus.addEventHandler((c) -> {
+	    handleClientEvent(c.getEvent());
+	});
+	
+	
 
     }
 
@@ -100,7 +105,7 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
 	    handleTargetServerConnection(c);
 	});
 
-	CustomEventHandler<NewPeerEvent> newClientHandler = (c) -> {
+	CustomEventHandler<PeerAcceptedEvent> newClientHandler = (c) -> {
 	    handleNewClientPeer(c);
 	};
 
@@ -111,16 +116,16 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
 
     }
 
-    protected void handleTargetServerConnection(CustomEventContext<NewPeerEvent> c) {
-	
+    protected void handleTargetServerConnection(CustomEventContext<PeerAcceptedEvent> c) {
+
 	serverNodeController = new ProxiedServerNodeController();
 	serverPeerId = c.getEvent().getData().getPeerId();
-	System.out.println("Server is connected "+serverPeerId);
+	System.out.println("Server is connected " + serverPeerId);
 	processPendingEvents();
     }
 
-    protected void handleNewClientPeer(CustomEventContext<NewPeerEvent> c) {
-	NewPeerEvent event = c.getEvent();
+    protected void handleNewClientPeer(CustomEventContext<PeerAcceptedEvent> c) {
+	PeerAcceptedEvent event = c.getEvent();
 	String peerId = event.getData().getPeerId();
 	if (clientsControllers.containsKey(peerId)) {
 	    /* ups we already have a client with this id */
@@ -130,25 +135,26 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
 
 	clientsControllers.put(peerId, new ProxiedClientNodeController());
 
-	handleClientEvent(new Event("GOT:REMOTE:PEER"));
+//	handleClientEvent(new Event("GOT:REMOTE:PEER"));
+
+//	handleClientEvent(event);
     }
-    
+
     private void processPendingEvents() {
-	while(!pendingClientEvents.isEmpty()) {
+	while (!pendingClientEvents.isEmpty()) {
 	    sendToServer(pendingClientEvents.poll());
 	}
     }
-    
+
     private void sendToServer(Event event) {
-	System.out.println("sending event to server "+event.toJson());
-	 context.forwardTo(event, serverPeerId);
+	System.out.println("sending event to server " + event.toJson());
+	context.forwardTo(event, serverPeerId);
     }
-    
+
     private void handleClientEvent(Event e) {
-	if(serverPeerId != null) {
+	if (serverPeerId != null) {
 	    sendToServer(e);
-	}
-	else {
+	} else {
 	    pendingClientEvents.offer(e);
 	}
     }

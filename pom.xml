@@ -32,4 +32,11 @@
          </plugin>
       </plugins>
    </build>
+   <dependencies>
+   <dependency>
+         <groupId>net.segoia</groupId>
+         <artifactId>web-events</artifactId>
+         <version>0.0.2-SNAPSHOT</version>
+      </dependency>
+   </dependencies>
 </project>

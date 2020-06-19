@@ -5,7 +5,6 @@ if (PB.MODULES.GEO == null) {
 	init : function(initData) {
 	    PB.pbAgent.activeState.registerHandler("GEO:DATA:TRAFFIC_DENSITY",
 		    function(ec) {
-			
 			handleTrafficDensityData(ec);
 		    });
 //	    console.log("registered geo data handler");

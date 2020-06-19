@@ -385,6 +385,12 @@ var PB=PB || {
 	    },
 	    "UserEntitiesAppSection":{
 		page:"entities_list.html"
+	    },
+	    "AggregatedAppSection":{
+		page: "submenu.html"
+	    },
+	    "StatsAppSection": {
+		page:"generic_stats.html"
 	    }
 	},
 	IDS:{

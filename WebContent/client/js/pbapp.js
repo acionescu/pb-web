@@ -480,8 +480,8 @@
 	}
     }
     
-//    startTest(getTargetUrl("/ogeg/ws/web/v0/events"));
-    startTest(getTargetUrl("/pb-web/ws/web/v0/events"));
+    startTest(getTargetUrl("/ogeg/ws/web/v0/events"));
+//    startTest(getTargetUrl("/pb-web/ws/web/v0/events"));
     
 //    startTest("wss://panouldebord.ro/ogegmob/ws/web/v0/events");
     

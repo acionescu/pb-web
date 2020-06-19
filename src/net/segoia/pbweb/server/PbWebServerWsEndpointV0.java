@@ -23,9 +23,9 @@ public class PbWebServerWsEndpointV0 extends ServerWsEndpointV0 {
 	// TODO Auto-generated method stub
 	super.init();
 
-	System.out.println("init node");
-	ServletContext ogegContext = getHttpSession().getServletContext().getContext("/ogeg");
-	System.out.println("ogeg context: " + ogegContext);
+//	System.out.println("init node");
+//	ServletContext ogegContext = getHttpSession().getServletContext().getContext("/ogeg");
+//	System.out.println("ogeg context: " + ogegContext);
     }
 
     @Override

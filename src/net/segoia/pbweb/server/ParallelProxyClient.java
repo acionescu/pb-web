@@ -13,10 +13,12 @@ import net.segoia.event.conditions.StrictSourceAliasMatchCondition;
 import net.segoia.event.conditions.StrictSourceTypeMatchCondition;
 import net.segoia.event.eventbus.CustomEventContext;
 import net.segoia.event.eventbus.Event;
+import net.segoia.event.eventbus.EventHeader;
 import net.segoia.event.eventbus.FilteringEventBus;
 import net.segoia.event.eventbus.peers.CustomEventHandler;
 import net.segoia.event.eventbus.peers.GlobalEventNodeAgent;
 import net.segoia.event.eventbus.peers.events.PeerAcceptedEvent;
+import net.segoia.event.eventbus.peers.events.PeerLeftEvent;
 import net.segoia.event.eventbus.peers.vo.bind.ConnectToPeerRequest;
 import net.segoia.eventbus.web.ws.v0.WsClientEndpointTransceiver;
 import net.segoia.util.logging.Logger;
@@ -35,6 +37,8 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
     private String serverPeerId;
 
     private Map<String, ProxiedClientNodeController> clientsControllers = new HashMap<>();
+    
+    private Map<String, PeerAcceptedEvent> proxiedClients = new HashMap<>();
 
     private Map<String, CustomEventHandler<PeerAcceptedEvent>> newPeerHandlersByType = new HashMap<>();
 
@@ -58,6 +62,10 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
 
     @Override
     protected void agentInit() {
+	connectToServer();
+    }
+
+    protected void connectToServer() {
 	context.registerToPeer(new ConnectToPeerRequest(targetServerClient));
     }
 
@@ -83,20 +91,56 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
 //	});
 
 	context.addEventHandler(PeerAcceptedEvent.class, (c) -> {
-	    String sourceType = c.getEvent().getHeader().getSourceType();
-	    System.out.println("new peer " + sourceType);
+	    PeerAcceptedEvent event = c.getEvent();
+	    String sourceType = event.getHeader().getSourceType();
+	    logger.info("new peer " + sourceType + " " + event.getData().getPeerId());
 	    CustomEventHandler<PeerAcceptedEvent> h = newPeerHandlersByType.get(sourceType);
 	    if (h != null) {
 		h.handleEvent(c);
 	    }
 	});
 
+	context.addEventHandler(PeerLeftEvent.class, (c) -> {
+	    handlePeerLeft(c);
+	});
+
 	clientsBus.addEventHandler((c) -> {
 	    handleClientEvent(c.getEvent());
 	});
-	
-	
 
+    }
+
+    protected void handlePeerLeft(CustomEventContext<PeerLeftEvent> c) {
+	String peerId = c.getEvent().getData().getPeerId();
+
+	if (serverPeerId != null && serverPeerId.equals(peerId)) {
+	    handleServerLeft(c);
+	}
+	else{
+	    handleClientLeft(c);
+	}
+    }
+    
+    protected void handleClientLeft(CustomEventContext<PeerLeftEvent> c) {
+	String peerId = c.getEvent().getData().getPeerId();
+	/* remove this from proxied clients */
+	PeerAcceptedEvent peerAcceptEvent = proxiedClients.remove(peerId);
+	
+	if(peerAcceptEvent != null) {
+	    /* terminate this peer */
+	    context.terminatePeer(peerId);
+	}
+    }
+
+    protected void handleServerLeft(CustomEventContext<PeerLeftEvent> c) {
+	logger.info("connection with server " + serverPeerId + " lost. Reconnecting...");
+	/* make server unavailable */
+	serverPeerId = null;
+	
+	/* disconnect all proxied peers */
+	
+	/* reconnect */
+	connectToServer();
     }
 
     @Override
@@ -120,20 +164,28 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
 
 	serverNodeController = new ProxiedServerNodeController();
 	serverPeerId = c.getEvent().getData().getPeerId();
-	System.out.println("Server is connected " + serverPeerId);
+	logger.info("Server is connected as " + serverPeerId);
 	processPendingEvents();
     }
 
     protected void handleNewClientPeer(CustomEventContext<PeerAcceptedEvent> c) {
 	PeerAcceptedEvent event = c.getEvent();
-	String peerId = event.getData().getPeerId();
-	if (clientsControllers.containsKey(peerId)) {
-	    /* ups we already have a client with this id */
-	    logger.error("Got new peer event, but peer id already existed: " + peerId);
-	    return;
-	}
 
-	clientsControllers.put(peerId, new ProxiedClientNodeController());
+	/* set origin cause */
+	EventHeader header = event.getHeader();
+	header.setOriginRootCause(header.getRootEvent());
+	
+	/* add this to proxied peers */
+	proxiedClients.put(event.getData().getPeerId(), event);
+
+//	String peerId = event.getData().getPeerId();
+//	if (clientsControllers.containsKey(peerId)) {
+//	    /* ups we already have a client with this id */
+//	    logger.error("Got new peer event, but peer id already existed: " + peerId);
+//	    return;
+//	}
+
+//	clientsControllers.put(peerId, new ProxiedClientNodeController());
 
 //	handleClientEvent(new Event("GOT:REMOTE:PEER"));
 
@@ -147,7 +199,9 @@ public class ParallelProxyClient extends GlobalEventNodeAgent {
     }
 
     private void sendToServer(Event event) {
-	System.out.println("sending event to server " + event.toJson());
+	if (logger.isDebugEnabled()) {
+	    logger.debug("sending event to server " + event.toJson());
+	}
 	context.forwardTo(event, serverPeerId);
     }
 

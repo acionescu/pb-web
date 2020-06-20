@@ -131,6 +131,14 @@ button:disabled {
 	padding: 10px;
 }
 
+.note {
+	background-color: white;
+	color: gray;
+	font-size: x-small;
+	text-align: center;
+	padding: 10px;
+}
+
 .notification {
 	border: 2px solid #bcd;
 	border-radius: 12px;
@@ -257,7 +265,7 @@ button:disabled {
 
 .statsCont{
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(300pt,max-content));
+	grid-template-columns: repeat(auto-fit, minmax(200pt,max-content));
 	grid-gap: 15px;
 	align-items: stretch;
 	justify-content: center;

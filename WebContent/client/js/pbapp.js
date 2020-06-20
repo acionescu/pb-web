@@ -21,7 +21,13 @@
 
     var sectionRefreshing = false;
 
-    sectionsData = {};
+    sectionsData = {
+	    
+	    logout: {
+		clickHandler: PB.MODULES.AUTH.logout
+	    }
+	    
+    };
 
     var lastScrollFunc;
     
@@ -91,12 +97,6 @@
 	}
     });
 
-    function log(message) {
-	if(PB.logging){
-		console.log(message);
-	}
-    }
-
     function startTest(target) {
 	if (target == null) {
 	    target = document.getElementById('target').value;
@@ -155,8 +155,89 @@
     function removeInfiniteScroll() {
 	$(window).off("scroll", lastScrollFunc);
     }
+    
+    function menuClickListener(e) {
+	    $(".menu ul .current-item").toggleClass("current-item");
+	    $(this).toggleClass("current-item");
+	    var cid = $(this).attr('id');
+	    log("selected: " + cid);
+
+	    $("#contentDesc").empty();
+	    $("#contentBody").empty();
+	    
+	    var sData = sectionsData[cid];
+	    currentSectionData=sData;
+	    removeInfiniteScroll();
+	    
+	    var setHash=true;
+	    
+	    if (sData) {
+		if(sData.filters){
+		    setupSectionFilters(sData.filters);
+		}
+		else{
+		    $("#contentFilters").hide();
+		}
+		
+		/* set page descpription */
+		$("#contentDesc").html(sData.desc);
+		
+		if(sData.clickHandler){
+		    setHash=false;
+		    sData.clickHandler();
+		}
+		
+		/* viewTypeconfig */
+		var viewTypeConfig;
+		log("Try to get view config for id "+sData.id);
+		if(sData.id != null){
+		    
+		    viewTypeConfig = PB.getViewTypeConfigById(sData.id);
+		}
+		
+		if(viewTypeConfig == null && sData.type != null){
+		    viewTypeConfig = PB.getViewTypeConfig(sData.type);
+		}
+		
+		if(viewTypeConfig != null && viewTypeConfig.page != null){
+			$("#contentBody").load(
+				"./client/"+viewTypeConfig.page, 'f' + (Math.random()*1000000));
+		}
+//		else{
+//			initInfiniteScroll(getSectionRefreshFunction(cid, 10));
+
+//			PB.pbAgent.refreshSection({
+//			    sectionId : cid,
+//			    startItem : 0,
+//			    itemCount : 10
+//			});
+//	    	}
+	    } else {
+		$("#contentFilters").hide();
+		
+		$("#contentDesc").html($(this).text());
+		
+		$("#contentBody").load(
+			"./client/"
+				+ $(this).find("a").first()
+					.attr('href').substr(1)
+				+ ".html", 'f' + (Math.random()*1000000));
+	    }
+	    if(setHash){
+		window.location.hash = '#' + cid;
+	    }
+	    
+	    /* hide menu on click in mobile mode */
+	    if(!$(".toggle-nav").hasClass("active")){
+		$(".toggle-nav").addClass('active');
+		$('.menu ul').addClass('active');
+	    }
+	    
+	    
+	}
 
     function initSections(data) {
+	PB.initData = data;
 	PB.initModules(data);
 	
 	var sHeader = $("#sectionsHeader");
@@ -185,76 +266,13 @@
 
 	}
 
-	$(".menu ul li").click(
-		function(e) {
-		    $(".menu ul .current-item").toggleClass("current-item");
-		    $(this).toggleClass("current-item");
-		    var cid = $(this).attr('id');
-		    log("selected: " + cid);
-
-		    $("#contentDesc").empty();
-		    $("#contentBody").empty();
-		    
-		    var sData = sectionsData[cid];
-		    currentSectionData=sData;
-		    removeInfiniteScroll();
-		    if (sData) {
-			if(sData.filters){
-			    setupSectionFilters(sData.filters);
-			}
-			else{
-			    $("#contentFilters").hide();
-			}
-			
-			/* set page descpription */
-			$("#contentDesc").html(sData.desc);
-			
-			/* viewTypeconfig */
-			var viewTypeConfig;
-			log("Try to get view config for id "+sData.id);
-			if(sData.id != null){
-			    
-			    viewTypeConfig = PB.getViewTypeConfigById(sData.id);
-			}
-			
-			if(viewTypeConfig == null && sData.type != null){
-			    viewTypeConfig = PB.getViewTypeConfig(sData.type);
-			}
-			
-			if(viewTypeConfig != null && viewTypeConfig.page != null){
-				$("#contentBody").load(
-					"./client/"+viewTypeConfig.page, 'f' + (Math.random()*1000000));
-			}
-// 			else{
-// 				initInfiniteScroll(getSectionRefreshFunction(cid, 10));
+	$(".menu ul li").click(menuClickListener);
 	
-// 				PB.pbAgent.refreshSection({
-// 				    sectionId : cid,
-// 				    startItem : 0,
-// 				    itemCount : 10
-// 				});
-// 		    	}
-		    } else {
-			$("#contentFilters").hide();
-			
-			$("#contentDesc").html($(this).text());
-			
-			$("#contentBody").load(
-				"./client/"
-					+ $(this).find("a").first()
-						.attr('href').substr(1)
-					+ ".html", 'f' + (Math.random()*1000000));
-		    }
-		    window.location.hash = '#' + cid;
-		    
-		    /* hide menu on click in mobile mode */
-		    if(!$(".toggle-nav").hasClass("active")){
-			$(".toggle-nav").addClass('active');
-			$('.menu ul').addClass('active');
-		    }
-		    
-		    
-		});
+	/* dropdown click listener */
+	
+	$(".dropdown-content a").click(menuClickListener);
+	
+	
 
 	var fragment = window.location.hash;
 	/* first init */
@@ -461,5 +479,11 @@
 	    $("#contentBody").html("<div class='noContent'>Nu există înregistrări</div>");
 	}
     }
-
+    
     startTest(getTargetUrl("/ogeg/ws/web/v0/events"));
+//    startTest(getTargetUrl("/pb-web/ws/web/v0/events"));
+    
+//    startTest("wss://panouldebord.ro/ogeg/ws/web/v0/events");
+    
+    
+    

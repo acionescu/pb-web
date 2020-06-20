@@ -1,0 +1,49 @@
+{
+	"busClassName": "net.segoia.event.eventbus.FilteringEventBus",
+	"defaultEventConfig": {
+		"loggingOn": true,
+		"loggingLevel": "DEBUG"
+	},
+	"eventsConfig":{
+		"PEER:EVENT:ENCRYPTED_EVENT" : {
+			"loggingOn": true,
+			"loggingLevel": "DEBUG",
+			"logAsBareEventOn": true
+		}
+ 	},
+	"eventRightsManager": {
+		"eventAllowedCondition": {
+			"id": "eventsAllowedCond",
+			"ctype": "not",
+			"conditions": [
+				{
+					"id": "bannedEventsCond",
+					"ctype": "or",
+					"conditions": [
+						{
+							"id": "bannedEvent1",
+							"et": "BANNED::"
+						},
+						{
+							"id": "bannedEvent2",
+							"et": ":EXECUTED:"
+						}
+					]
+				}
+			]
+		}
+	},
+	"listeners": {
+		"list1": {
+			"instance": {
+				"className": "net.segoia.event.eventbus.listeners.logging.LoggingEventListener",
+				"loggerFactory": {
+					"className": "net.segoia.util.logging.Log4jLoggerFactory"
+				}
+				,"printAsJson":"true"
+			},
+			"priority": 90
+		}
+		
+	}
+}

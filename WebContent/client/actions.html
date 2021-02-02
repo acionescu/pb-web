@@ -1,0 +1,74 @@
+<div class="filtersContaier">
+	<div class="filterCont">
+		<div class="select-style">
+			<select id="userActions"></select>
+		</div>
+	</div>
+</div>
+<div id="actionContent"></div>
+
+<script>
+    var userActions = currentSectionData.userActions;
+
+    var currentActionsMap = {};
+
+    $("#userActions").off("change");
+    $("#userActions").change(onActionSelect);
+
+    function populateActions(ua, cont) {
+	if (ua == null) {
+	    return;
+	}
+
+	cont.empty();
+
+	for (var i = 0; i < ua.length; i++) {
+	    var a = ua[i];
+	    currentActionsMap[a.id] = a;
+	    var o = $("<option>").val(a.id).html(a.desc);
+	    console.log("add action " + a.id + " " + a.desc);
+	    cont.append(o);
+
+	}
+    }
+
+    populateActions(userActions, $("#userActions"));
+
+    function onActionSelect() {
+	var selActionId = $("#userActions").val();
+	log("selected action: " + selActionId);
+	var action = currentActionsMap[selActionId];
+	if (action == null) {
+	    return;
+	}
+
+	displayActionView(action);
+
+    }
+
+    function displayActionView(action) {
+	/* get the form template entity */
+	var actionFormTemplate = action.entity;
+
+	if (actionFormTemplate == null) {
+	    return;
+	}
+
+	var formController = new FormDataController(
+		actionFormTemplate.requiredData);
+	var formCont = formController.buildView($("#actionContent"), [ {
+	    desc : "Trimite",
+	    callback : buildUserCommandHandler(action)
+	} ]);
+    }
+
+    function buildUserCommandHandler(action) {
+	return function() {
+	    log("user action: " + action.id);
+	}
+    }
+
+    function handleSubmitAction(action) {
+
+    }
+</script>

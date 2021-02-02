@@ -263,6 +263,43 @@ DataFieldController.prototype.getValueData=function(valueId){
     return null;
 }
 
+DataFieldController.prototype.buildView=function(dataContext){
+    var fieldCont = $("<div>");
+    var fieldTitle = $("<div>").addClass("datafield-elem");
+    var fieldInfo = $("<div>").addClass("datafield-elem");
+    var fieldError=$("<div>").addClass("datafield-elem");
+    
+    var fe = this.getElement(dataContext);
+    
+    
+    fieldCont.append(fieldTitle);
+    fieldCont.append(fieldInfo);
+    fieldCont.append(fe);
+    fieldCont.append(fieldError);
+    
+    fieldError.hide();
+    
+    if(this.df.desc != null){
+	fieldTitle.html(this.df.desc);
+    }
+    
+    if(this.df.info != null){
+	fieldInfo.html(this.df.info);
+    }
+    else{
+	fieldInfo.hide();
+    }
+    
+    this.initUi();
+    
+    return fieldCont;
+}
+
+/**
+ * Form data controller
+ * @param dataFields
+ * @returns
+ */
 function FormDataController(dataFields){
     /* fields controllers */
     this.fields={};
@@ -280,6 +317,9 @@ FormDataController.prototype.initFromDataFields=function(dataFields){
 	var df = dataFields[i];
 	/* build a controller for this field */
 	var dfc = PB.getDataFieldController(df);
+	if(dfc == null){
+	    log("Error: Failed to create controller for datafield type"+df.inputType);
+	}
 	this.fields[df.id]=dfc;
     }
         
@@ -333,8 +373,43 @@ FormDataController.prototype.onFieldValuesAvailable = function(data){
 	     dfc.elem.change();
 	 }
     }
+}
+
+/**
+ * Builds the view for a form controller
+ * Provide a container and optionally a list of commands. Each object from the list should contain a description and 
+ * a callback function
+ * e.g.:
+ * {
+ *  "desc" : < label >
+ *  "calback" : < a function >
+ * }
+ */
+FormDataController.prototype.buildView=function(container,commands){
+    for(var fid in this.fields){
+	var fc = this.fields[fid];
+	var fCont = fc.buildView(this);
+	container.append(fCont);
+    }
     
-   
+    if(commands != null && commands.length > 0){
+	var commandsCont = $("<div>").addClass("form-area");
+	
+	for(var ci in commands){
+	    var cDef = commands[ci];
+	    
+	    var cView = $("<button>").addClass("datafield-elem");
+	    cView.html(cDef.desc);
+	    cView.click(cDef.callback);
+	    
+	    commandsCont.append(cView);
+	    
+	}
+	
+	container.append(commandsCont);
+    }
+    
+    return container;
 }
 
 
@@ -391,6 +466,9 @@ var PB=PB || {
 	    },
 	    "StatsAppSection": {
 		page:"generic_stats.html"
+	    },
+	    "UserActionsSection" : {
+		page: "actions.html"
 	    }
 	},
 	IDS:{
@@ -414,7 +492,16 @@ function log(message) {
 
 PB.initModules = function(data){
     for(var mid in PB.MODULES){
-	PB.MODULES[mid].init(data);
+	var mod = PB.MODULES[mid];
+	if(mod.initialized && mod.onAppDataUpdate != null){
+	    /* if the module was already initialized, call update */
+	    mod.onAppDataUpdate(data);
+	}
+	else{
+	    /* call init if the module was not initialized before */
+	    mod.init(data);
+	    mod.initialized = true;
+	}
     }
 }
 
@@ -472,6 +559,36 @@ PB.getDparamValue=function(pConfig, dataContext){
 
 PB.dataFieldsToInputs={
 	
+	/* simple text input */
+	"0": function(df){
+	    var c=new DataFieldController(df);
+	    
+	    /* override create function  */
+	    c.createElement= function(df){
+		var s = $("<input>");
+		
+		return s;
+	    },
+	    /* override populate function */
+	    c.populate= function(data){
+		
+		if(this.df.value != null){
+		    this.elem[0].value = this.df.value;
+		}
+		
+	    },
+	    c.getUiValue = function(){
+		
+		return this.elem.val();
+	    }
+	    
+	    c.initUi=function(){
+		this.elem.parent().addClass("text-style");
+	    }
+	    
+	    return c;
+	},
+	
 	/* select/combobox */
 	"1" : function(df) {
 	    
@@ -516,6 +633,35 @@ PB.dataFieldsToInputs={
 	    
 	    c.initUi=function(){
 		this.elem.parent().addClass("select-style");
+	    }
+	    
+	    return c;
+	},
+	/* simple text input */
+	"3": function(df){
+	    var c=new DataFieldController(df);
+	    
+	    /* override create function  */
+	    c.createElement= function(df){
+		var s = $("<textarea rows='5'>");
+		
+		return s;
+	    },
+	    /* override populate function */
+	    c.populate= function(data){
+		
+		if(this.df.value != null){
+		    this.elem[0].value = this.df.value;
+		}
+		
+	    },
+	    c.getUiValue = function(){
+		
+		return this.elem.val();
+	    }
+	    
+	    c.initUi=function(){
+		this.elem.parent().addClass("text-style");
 	    }
 	    
 	    return c;

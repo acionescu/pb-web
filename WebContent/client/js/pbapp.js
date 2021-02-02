@@ -244,6 +244,9 @@
 	// 	var sc = $("#sections");
 
 	var about = $("#despre");
+	
+	/* remove all dynamic elements */
+	about.prevAll().remove();
 
 	var sArray = [];
 
@@ -265,11 +268,13 @@
 	    sArray.push(s.id);
 
 	}
-
+	/* remove old click listeners */
+	$(".menu ul li").off("click");
+	
 	$(".menu ul li").click(menuClickListener);
 	
 	/* dropdown click listener */
-	
+	$(".dropdown-content a").off("click");
 	$(".dropdown-content a").click(menuClickListener);
 	
 	
@@ -278,7 +283,13 @@
 	/* first init */
 	log("fragment="+fragment);
 	if(fragment == null || fragment.length < 2){
-	    $(".menu ul li").first().click();
+	   	    
+	    if(data.defaultSection != null){
+		displaySection("#"+data.defaultSection);
+	    }
+	    else{
+		$(".menu ul li").first().click();
+	    }
 	}
 	else{
 	    var selSection=$(".menu ul").find(fragment);
@@ -290,10 +301,17 @@
 		$(".menu ul li").first().click();
 	    }
 	}
-	
-	
-
-	
+    }
+    
+    function displaySection(sectionId){
+	 var selSection=$(".menu ul").find(sectionId);
+	    
+	    if(selSection.length > 0){
+	    	selSection.first().click();
+	    }
+	    else{
+		$(".menu ul li").first().click();
+	    }
     }
     
     function refreshCurrentSection(){

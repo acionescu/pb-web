@@ -26,6 +26,15 @@ PbAppClient.prototype.getDataFieldAllowedValues=function(data){
     });
 }
 
+PbAppClient.prototype.getEntityDataByHash=function(entityHash){
+    this.send({
+	et: "APP:ENTITY:GET_DATA",
+	data: {
+	    hash:entityHash
+	}
+    });
+}
+
 function DataFieldController(df){
     /* the datafield object */
     this.df=df;
@@ -176,7 +185,7 @@ DataFieldController.prototype.update=function(dataContext){
 	PB.pbAgent.getDataFieldAllowedValues({dataFieldId:this.df.id, dataSourceId:valuesMap.ds.id, params:extraParams});
 	
     }
-    else if(this.df.allowedValues != null){
+    else if(this.df.allowedValues != null || this.df.value != null){
 	/* if the allowed values are present, populate from those */
 	this.populate();
     }
@@ -263,23 +272,69 @@ DataFieldController.prototype.getValueData=function(valueId){
     return null;
 }
 
-function FormDataController(dataFields){
+DataFieldController.prototype.buildView=function(dataContext){
+    var fieldCont = $("<div>");
+    var fieldTitle = $("<div>").addClass("datafield-elem");
+    var fieldInfo = $("<div>").addClass("datafield-elem");
+    var fieldError=$("<div>").addClass("datafield-elem");
+    
+    var fe = this.getElement(dataContext);
+    
+    
+    fieldCont.append(fieldTitle);
+    fieldCont.append(fieldInfo);
+    fieldCont.append(fe);
+    fieldCont.append(fieldError);
+    
+    fieldError.hide();
+    
+    if(this.df.desc != null){
+	fieldTitle.html(this.df.desc);
+    }
+    
+    if(this.df.info != null){
+	fieldInfo.html(this.df.info);
+    }
+    else{
+	fieldInfo.hide();
+    }
+    
+    this.initUi();
+    
+    return fieldCont;
+}
+
+/**
+ * Form data controller
+ * @param dataFields
+ * @returns
+ */
+function FormDataController(dataFields, currentValues){
     /* fields controllers */
     this.fields={};
         
     if(dataFields != null){
-	this.initFromDataFields(dataFields);
+	this.initFromDataFields(dataFields, currentValues);
     }
 }
 
 FormDataController.prototype = Object.create(FormDataController.prototype);
 FormDataController.prototype.constructor=FormDataController;
 
-FormDataController.prototype.initFromDataFields=function(dataFields){
+FormDataController.prototype.initFromDataFields=function(dataFields, currentValues){
     for(var i in dataFields){
 	var df = dataFields[i];
+	
+	/* init with current value */
+	if(currentValues != null && currentValues[df.id] != null){
+	    df.value = currentValues[df.id];
+	}
+	
 	/* build a controller for this field */
 	var dfc = PB.getDataFieldController(df);
+	if(dfc == null){
+	    log("Error: Failed to create controller for datafield type"+df.inputType);
+	}
 	this.fields[df.id]=dfc;
     }
         
@@ -333,8 +388,43 @@ FormDataController.prototype.onFieldValuesAvailable = function(data){
 	     dfc.elem.change();
 	 }
     }
+}
+
+/**
+ * Builds the view for a form controller
+ * Provide a container and optionally a list of commands. Each object from the list should contain a description and 
+ * a callback function
+ * e.g.:
+ * {
+ *  "desc" : < label >
+ *  "calback" : < a function >
+ * }
+ */
+FormDataController.prototype.buildView=function(container,commands){
+    for(var fid in this.fields){
+	var fc = this.fields[fid];
+	var fCont = fc.buildView(this);
+	container.append(fCont);
+    }
     
-   
+    if(commands != null && commands.length > 0){
+	var commandsCont = $("<div>").addClass("form-area");
+	
+	for(var ci in commands){
+	    var cDef = commands[ci];
+	    
+	    var cView = $("<button>").addClass("datafield-elem");
+	    cView.html(cDef.desc);
+	    cView.click(cDef.callback);
+	    
+	    commandsCont.append(cView);
+	    
+	}
+	
+	container.append(commandsCont);
+    }
+    
+    return container;
 }
 
 
@@ -391,11 +481,17 @@ var PB=PB || {
 	    },
 	    "StatsAppSection": {
 		page:"generic_stats.html"
+	    },
+	    "UserActionsSection" : {
+		page: "actions.html"
 	    }
 	},
 	IDS:{
 	    "harta_sesizari":{
 		page:"harta_sesizari.html"
+	    },
+	    "detalii":{
+		page:"detalii.html"
 	    }
 	}
     },
@@ -414,7 +510,16 @@ function log(message) {
 
 PB.initModules = function(data){
     for(var mid in PB.MODULES){
-	PB.MODULES[mid].init(data);
+	var mod = PB.MODULES[mid];
+	if(mod.initialized && mod.onAppDataUpdate != null){
+	    /* if the module was already initialized, call update */
+	    mod.onAppDataUpdate(data);
+	}
+	else{
+	    /* call init if the module was not initialized before */
+	    mod.init(data);
+	    mod.initialized = true;
+	}
     }
 }
 
@@ -428,10 +533,15 @@ PB.getViewTypeConfigById=function(viewId){
 }
 
 PB.refreshCurrentSection=function(filtersValues){
+    /* set url params from filter values */
+    PB.CONTROLLER.setFilterParams(filtersValues,true);
+    
     var sc = PB.sectionController;
     if(sc != null && sc.refreshSection != null){
 	sc.refreshSection(filtersValues);
     }
+    
+    
 }
 
 PB.handleSectionData=function(data, defaultHandler){
@@ -441,6 +551,14 @@ PB.handleSectionData=function(data, defaultHandler){
     }
     else if(defaultHandler != null){
 	defaultHandler(data);
+    }
+}
+
+PB.handlePetitionData=function(data){
+    var sc = PB.sectionController;
+    log("PB.handlePetitionData called, section controller: "+sc);
+    if(sc != null && sc.onPetitionData != null){
+	sc.onPetitionData(data);
     }
 }
 
@@ -472,6 +590,36 @@ PB.getDparamValue=function(pConfig, dataContext){
 
 PB.dataFieldsToInputs={
 	
+	/* simple text input */
+	"0": function(df){
+	    var c=new DataFieldController(df);
+	    
+	    /* override create function  */
+	    c.createElement= function(df){
+		var s = $("<input>");
+		
+		return s;
+	    },
+	    /* override populate function */
+	    c.populate= function(data){
+		
+		if(this.df.value != null){
+		    this.elem[0].value = this.df.value;
+		}
+		
+	    },
+	    c.getUiValue = function(){
+		
+		return this.elem.val();
+	    }
+	    
+	    c.initUi=function(){
+		this.elem.parent().addClass("text-style");
+	    }
+	    
+	    return c;
+	},
+	
 	/* select/combobox */
 	"1" : function(df) {
 	    
@@ -495,7 +643,7 @@ PB.dataFieldsToInputs={
 		
 		
 		if(values != null){
-		    log("populate elem "+this.elem +" for datafiled "+this.df.id);
+		    log("populate elem "+this.elem +" for datafiled "+this.df.id +" with value "+this.df.value);
 		    for(var i in values){
 			var v=values[i];
 			var optionElem=$("<option value="+v.id+">").html(v.desc);
@@ -516,6 +664,35 @@ PB.dataFieldsToInputs={
 	    
 	    c.initUi=function(){
 		this.elem.parent().addClass("select-style");
+	    }
+	    
+	    return c;
+	},
+	/* simple text input */
+	"3": function(df){
+	    var c=new DataFieldController(df);
+	    
+	    /* override create function  */
+	    c.createElement= function(df){
+		var s = $("<textarea rows='5'>");
+		
+		return s;
+	    },
+	    /* override populate function */
+	    c.populate= function(data){
+		
+		if(this.df.value != null){
+		    this.elem[0].value = this.df.value;
+		}
+		
+	    },
+	    c.getUiValue = function(){
+		
+		return this.elem.val();
+	    }
+	    
+	    c.initUi=function(){
+		this.elem.parent().addClass("text-style");
 	    }
 	    
 	    return c;
@@ -546,4 +723,22 @@ PB.goHome= function(){
 	}
 	log("going home to section "+firstSectionId);
 	$("#"+firstSectionId).click();
+    }
+
+PB.showInfoMessage = function(message, timeout) {
+	var elem = document.getElementById("snackbar");
+	if (elem == null) {
+	    return;
+	}
+	elem.innerHTML = message;
+
+	elem.classList.add("show");
+
+	if (timeout == null) {
+	    timeout = 3000;
+	}
+
+	setTimeout(function() {
+	    elem.classList.remove("show");
+	}, timeout);
     }

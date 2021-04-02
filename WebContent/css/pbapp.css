@@ -37,6 +37,22 @@ button:disabled {
 	background-color: gray;
 }
 
+.text-style {
+	border: 1px solid #486666;
+	border-radius: 8px;
+	overflow: hidden;
+	background: #F5F5DC;
+	padding: 5pt;
+}
+
+.datafield-elem {
+	padding: 5pt;
+}
+
+.form-area {
+	padding: 5pt;
+}
+
 .select-style {
 	border: 1px solid #486666;
 	border-radius: 8px;
@@ -155,6 +171,29 @@ button:disabled {
 	border-radius: 10px 10px 0 0;
 }
 
+.notifTitle {
+	display:inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+.notifActions {
+	display: inline-block;
+	float: right;
+	margin: 0;
+	padding: 0;
+}
+
+.notifActions a {
+	color:white;
+	cursor:pointer;
+}
+
+.actionIcon{
+	color:white;
+	margin-right: 0.5em;
+}
+
 .notifBody {
 	background-color: #F5F5DC;
 	padding: 10px;
@@ -164,12 +203,24 @@ button:disabled {
 	border-radius: 0 0 10px 10px;
 }
 
+.notifBody .notifContent a {
+	color: #4e9a06;
+	text-decoration: none;
+}
+
+.notifBody .notifContent a:hover {
+	text-decoration: underline;
+	color:#73d216;
+}
+
 .notifFooter {
 	
 }
 
-.notifStats {
+.notifInfoArea{
 	background-color: #F5F5DC;
+	padding:0;
+	margin:0;
 	padding-left: 10px;
 	padding-right: 10px;
 	padding-top: 5px;
@@ -177,7 +228,21 @@ button:disabled {
 	border-bottom: 1px solid #486666;
 }
 
+.notifStats {
+	display:inline-block;
+}
+
 .statsItem {
+	color: gray;
+	margin-right: 0.4em;
+}
+
+.notifInfo{
+	display:inline-block;
+	float: right;
+}
+
+.notifIcon{
 	color: gray;
 	margin-right: 0.4em;
 }
@@ -263,9 +328,9 @@ button:disabled {
 	margin: 10pt;
 }
 
-.statsCont{
+.statsCont {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(200pt,max-content));
+	grid-template-columns: repeat(auto-fit, minmax(200pt, max-content));
 	grid-gap: 15px;
 	align-items: stretch;
 	justify-content: center;
@@ -276,8 +341,8 @@ button:disabled {
 	text-align: center;
 }
 
-.statsCont .notification .notifBody{
-	background: #d3d7cf; 
+.statsCont .notification .notifBody {
+	background: #d3d7cf;
 	margin-top: 0;
 	padding-top: 0;
 	margin-left: 0;
@@ -285,88 +350,82 @@ button:disabled {
 	padding-left: 0;
 	padding-right: 0;
 	text-align: center;
-	width:100%;
+	width: 100%;
 }
 
-.statsBodyCont{
-/* 	display: inline-block; */
+.statsBodyCont {
+	/* 	display: inline-block; */
 	margin-left: auto;
 	margin-right: auto;
-	
 	width: 100%;
-	display:grid;
+	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(50pt, 1fr));
-/* 	grid-auto-columns:100pt; */
+	/* 	grid-auto-columns:100pt; */
 }
 
 .statsTemplate {
-	display:inline-block;
+	display: inline-block;
 	height: 100%;
-	width:100%;
+	width: 100%;
 }
 
 .statsCol {
-	display:inline-block;
-/* display: table-cell; */
-/* display: table-row-group; */
-
-/* display:grid; */
-/* grid-template-columns: repeat(auto-fit, minmax(10pt, 1fr)); */
-
+	display: inline-block;
+	/* display: table-cell; */
+	/* display: table-row-group; */
+	/* display:grid; */
+	/* grid-template-columns: repeat(auto-fit, minmax(10pt, 1fr)); */
 	vertical-align: middle;
 	margin: 0;
 	padding: 0;
 	border-bottom: 1px solid #d3d7cf;
-/* 	text-align: center; */
-	width:100%;
-/* 	min-width: 100pt; */
-
+	/* 	text-align: center; */
+	width: 100%;
+	/* 	min-width: 100pt; */
 }
 
 .statsName {
-/* 	display: table-cell; */
-/* display:inline-block; */
+	/* 	display: table-cell; */
+	/* display:inline-block; */
 	padding: 5pt;
 	margin: 0;
-/* 	min-width: 100pt; */
-/* 	width:100%; */
+	/* 	min-width: 100pt; */
+	/* 	width:100%; */
 	height: 30pt;
 	vertical-align: middle;
-/* 	line-height: 30pt; */
+	/* 	line-height: 30pt; */
 	text-align: left;
 }
 
 .statsVal {
-/* 	display:table-cell; */
-/* display:inline-block; */
+	/* 	display:table-cell; */
+	/* display:inline-block; */
 	padding: 5pt;
 	margin: 0;
 	height: 30pt;
-/* 	min-width: 100pt; */
-/* 	width:100%; */
-		
+	/* 	min-width: 100pt; */
+	/* 	width:100%; */
 	vertical-align: middle;
-	text-align:center;
+	text-align: center;
 	line-height: 30pt;
 }
 
 .statText {
-	display:flex;
-	margin:auto;
+	display: flex;
+	margin: auto;
 	align-items: center;
 	vertical-align: middle;
 	height: 100%;
-/* 		border: 1px solid red; */
+	/* 		border: 1px solid red; */
 }
 
 .caption {
 	background: #d3d7cf;
-/* 	border: 1px solid gray; */
-line-height:20pt;
-
-height: 20pt;
+	/* 	border: 1px solid gray; */
+	line-height: 20pt;
+	height: 20pt;
 	padding-top: 0;
-	padding-bottom:0;
+	padding-bottom: 0;
 }
 
 .alt0 {
@@ -374,9 +433,40 @@ height: 20pt;
 }
 
 .alt1 {
-/* 	background: #b9cdcd; */
+	/* 	background: #b9cdcd; */
+	background: #F5F5DC;
+}
 
-background: #F5F5DC;
+.selection-div {
+	text-align: center;
+	padding: 10pt;
+	border: 1px solid gray;
+	margin: 2pt;
+	color: #486666;
+}
+
+.selection-div:hover {
+	background-color: #F5F5DC;
+	color: #486666;
+}
+
+.selection-div:active {
+	color: #F5F5DC;
+	background-color: #486666;
+}
+
+.selection-dialog .ui-dialog-titlebar-close {
+	display: none;
+}
+
+.ui-dialog .ui-dialog-title {
+	text-align: center;
+	width: 100%;
+	color: #F5F5DC;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+	background: #486666;
 }
 
 @media only screen and (max-width:980px) {
@@ -431,6 +521,6 @@ background: #F5F5DC;
 	/* 	} */
 	.lidl-logo-img {
 		max-height: 90px;
-		width:auto;
+		width: auto;
 	}
 }

@@ -15,23 +15,25 @@
 <meta name="description" content="Susținem democrația participativă" />
 <title>Pb App - test</title>
 
-<script src="./client/js/min/event-bus.js"></script>
-<script src="./client/js/min/pb-app-core.js"></script>
-<script src="./client/js/min/util.js"></script>
-<script src="./client/js/min/pb-app-geo.js"></script>
+<script src="./client/js/event-bus.js"></script>
+<script src="./client/js/pb-app-core.js?v=1.03"></script>
+<script src="./client/js/util.js?v=3"></script>
+<script src="./client/js/pb-app-geo.js"></script>
+<script src="./client/js/pb-app-auth.js"></script>
+
 <script src="./tp/jquery-2.1.1.js"></script>
 
 <script src="./tp/jquery-ui.js"></script>
 
 
 <link rel="stylesheet" href="./tp/jquery-ui.css">
-<link rel="stylesheet" href="./css/pbapp.css?v=1.8">
+<link rel="stylesheet" href="./css/pbapp.css?v=1.95">
 <link rel="stylesheet" href="./css/nav.css?v=1.4">
 <link rel="stylesheet" href="./css/fa-all.css">
 <link rel="stylesheet" href="./css/menubar.css">
+<link rel="stylesheet" href="./css/app.css">
 
-<script src="./client/js/min/pb-app-auth.js"></script>
-<script src="./client/js/min/pbapp.js"></script>
+<script src="./client/js/pbapp.js?v=0.11"></script>
 
 
 </head>
@@ -64,12 +66,14 @@
 <!-- 			<li id="login"><a href="#login">Autentificare</a></li> -->
 			<div id="account" class="dropdown" hidden>
 					<a class="dropbtn">
-						Cont <i class="fa fa-caret-down"></i>
+						<span id="account-text">Cont</span> <i class="fa fa-caret-down"></i>
 					</a>
 					<div class="dropdown-content">
+					<span id="change-user-profile" hidden>Schimbă profilul</span>
 					<a id="logout" href="#logout">Logout</a> 
 				</div>
 			</div>
+			<li id="detalii" hidden><a href="#detalii">Detalii</a></li> 
 		</ul>
 
 
@@ -85,8 +89,15 @@
 	</div>
 
 	<div id="nTemplate" class="notification" hidden="true">
-		<div class="notifHeader"></div>
-		<div class="notifStats"></div>
+		<div class="notifHeader">
+			<div class="notifTitle"></div>
+			<div class="notifActions"></div>
+		</div>
+		<div class="notifInfoArea">
+			<div class="notifStats"></div>
+			<div class="notifInfo"></div>
+		</div>
+		
 		<div class="notifBody"></div>
 		<div class="notifFooter"></div>
 	</div>
@@ -94,6 +105,7 @@
 	<div id="dialog-confirm" title="" hidden>
 	  
 	</div>
+	<div id="snackbar" class="snackbar"></div>
 </body>
 
 

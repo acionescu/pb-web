@@ -10,7 +10,7 @@
       <additionalparam>-Xdoclint:none</additionalparam>
    </properties>
    <build>
-      <sourceDirectory>src/main/java</sourceDirectory>
+      <sourceDirectory>src</sourceDirectory>
       <testSourceDirectory>src/test/java</testSourceDirectory>
       <plugins>
          <plugin>

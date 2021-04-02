@@ -26,6 +26,15 @@ PbAppClient.prototype.getDataFieldAllowedValues=function(data){
     });
 }
 
+PbAppClient.prototype.getEntityDataByHash=function(entityHash){
+    this.send({
+	et: "APP:ENTITY:GET_DATA",
+	data: {
+	    hash:entityHash
+	}
+    });
+}
+
 function DataFieldController(df){
     /* the datafield object */
     this.df=df;
@@ -176,7 +185,7 @@ DataFieldController.prototype.update=function(dataContext){
 	PB.pbAgent.getDataFieldAllowedValues({dataFieldId:this.df.id, dataSourceId:valuesMap.ds.id, params:extraParams});
 	
     }
-    else if(this.df.allowedValues != null){
+    else if(this.df.allowedValues != null || this.df.value != null){
 	/* if the allowed values are present, populate from those */
 	this.populate();
     }
@@ -300,21 +309,27 @@ DataFieldController.prototype.buildView=function(dataContext){
  * @param dataFields
  * @returns
  */
-function FormDataController(dataFields){
+function FormDataController(dataFields, currentValues){
     /* fields controllers */
     this.fields={};
         
     if(dataFields != null){
-	this.initFromDataFields(dataFields);
+	this.initFromDataFields(dataFields, currentValues);
     }
 }
 
 FormDataController.prototype = Object.create(FormDataController.prototype);
 FormDataController.prototype.constructor=FormDataController;
 
-FormDataController.prototype.initFromDataFields=function(dataFields){
+FormDataController.prototype.initFromDataFields=function(dataFields, currentValues){
     for(var i in dataFields){
 	var df = dataFields[i];
+	
+	/* init with current value */
+	if(currentValues != null && currentValues[df.id] != null){
+	    df.value = currentValues[df.id];
+	}
+	
 	/* build a controller for this field */
 	var dfc = PB.getDataFieldController(df);
 	if(dfc == null){
@@ -474,6 +489,9 @@ var PB=PB || {
 	IDS:{
 	    "harta_sesizari":{
 		page:"harta_sesizari.html"
+	    },
+	    "detalii":{
+		page:"detalii.html"
 	    }
 	}
     },
@@ -515,10 +533,15 @@ PB.getViewTypeConfigById=function(viewId){
 }
 
 PB.refreshCurrentSection=function(filtersValues){
+    /* set url params from filter values */
+    PB.CONTROLLER.setFilterParams(filtersValues,true);
+    
     var sc = PB.sectionController;
     if(sc != null && sc.refreshSection != null){
 	sc.refreshSection(filtersValues);
     }
+    
+    
 }
 
 PB.handleSectionData=function(data, defaultHandler){
@@ -528,6 +551,14 @@ PB.handleSectionData=function(data, defaultHandler){
     }
     else if(defaultHandler != null){
 	defaultHandler(data);
+    }
+}
+
+PB.handlePetitionData=function(data){
+    var sc = PB.sectionController;
+    log("PB.handlePetitionData called, section controller: "+sc);
+    if(sc != null && sc.onPetitionData != null){
+	sc.onPetitionData(data);
     }
 }
 
@@ -612,7 +643,7 @@ PB.dataFieldsToInputs={
 		
 		
 		if(values != null){
-		    log("populate elem "+this.elem +" for datafiled "+this.df.id);
+		    log("populate elem "+this.elem +" for datafiled "+this.df.id +" with value "+this.df.value);
 		    for(var i in values){
 			var v=values[i];
 			var optionElem=$("<option value="+v.id+">").html(v.desc);
@@ -692,4 +723,22 @@ PB.goHome= function(){
 	}
 	log("going home to section "+firstSectionId);
 	$("#"+firstSectionId).click();
+    }
+
+PB.showInfoMessage = function(message, timeout) {
+	var elem = document.getElementById("snackbar");
+	if (elem == null) {
+	    return;
+	}
+	elem.innerHTML = message;
+
+	elem.classList.add("show");
+
+	if (timeout == null) {
+	    timeout = 3000;
+	}
+
+	setTimeout(function() {
+	    elem.classList.remove("show");
+	}, timeout);
     }

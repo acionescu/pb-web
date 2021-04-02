@@ -56,10 +56,10 @@ var JSUTIL = JSUTIL || {
 	        ];
 	        if (d == 0) {
 	            // only 1 intersection
-//	            return [intersections[0]];
+// return [intersections[0]];
 	        }
 	        return [{x:i[0],y:(m*(i[0])+n)},{x:i[1],y:(m*(i[1])+n)}];
-//	        return [{x:i[0],y:(-m*(h-i[0])+k)},{x:i[1],y:(-m*(h-i[1])+k)}];
+// return [{x:i[0],y:(-m*(h-i[0])+k)},{x:i[1],y:(-m*(h-i[1])+k)}];
 	    }
 	    console.log("no intersection");
 	    // no intersection
@@ -81,14 +81,14 @@ var JSUTIL = JSUTIL || {
 	       var xi1 =D*dy +sgny*dx*Math.sqrt(d);
 	       var xi2 = D*dy -sgny*dx*Math.sqrt(d);
 	       
-//	       var m = dy/dx;
-//	       var n = y2 - m*x2;
+// var m = dy/dx;
+// var n = y2 - m*x2;
 	       
 	       var yi1 = -D*dx+Math.abs(dy)*Math.sqrt(d);
 	       var yi2 = -D*dx-Math.abs(dy)*Math.sqrt(d);
 	       
-//	       var yi1 = m*xi1+n;
-//	       var yi2 = m*xi2+n;
+// var yi1 = m*xi1+n;
+// var yi2 = m*xi2+n;
 	       
 	       return [{x:xi1,y:yi1},{x:xi2,y:yi2}];
 	   }
@@ -127,8 +127,8 @@ var JSUTIL = JSUTIL || {
 	    line = JSUTIL.toSlopeLine(0,0,x1-x2,y1-y2);
 	    var ip2 =JSUTIL.findCircleLineIntersections(r2,0,0,line.m,0);
 	    
-//	    var ip1 = JSUTIL.findCircleLineIntersections2(r1,0,0,x2-x1,y2-y1);
-//	    var ip2 = JSUTIL.findCircleLineIntersections2(r2,0,0,x1-x2,y1-y2);
+// var ip1 = JSUTIL.findCircleLineIntersections2(r1,0,0,x2-x1,y2-y1);
+// var ip2 = JSUTIL.findCircleLineIntersections2(r2,0,0,x1-x2,y1-y2);
 //	    
 	    ip1.forEach(function(p){
 		p.x += x1;
@@ -187,5 +187,89 @@ var JSUTIL = JSUTIL || {
         },
         isIntervalStarted:function(name){
             return (this.INTERVALS[name] != null);
+        },
+        parseFragment:function(fragment){
+            
         }
+}
+
+class AppController{
+    
+    constructor(){
+	this.SECTION_PARAM="s";
+	this.urlParams = this.buildParamsFromFragment(window.location.hash);
+    }
+    
+    buildParamsFromFragment(paramsString){
+	if(paramsString){	
+	    if(paramsString.charAt(0)==="#"){
+		paramsString = paramsString.substring(1);
+	    }
+        	if(paramsString.includes("=")){
+        	    return new URLSearchParams(paramsString);
+        	}
+        	else{
+        	    var urlParams = new URLSearchParams();
+        	    /* consider the string as the section */
+        	    urlParams.set(this.SECTION_PARAM,paramsString);
+        	    
+        	    return urlParams;
+        	}
+	}
+	return new URLSearchParams();
+    }
+    
+    getSection(){
+	return this.urlParams.get(this.SECTION_PARAM);
+    }
+    
+    setSection(section, setHash){
+	this.urlParams = new URLSearchParams();
+	this.urlParams.set(this.SECTION_PARAM, section);
+	if(setHash){
+	    this.setParamsToURL();
+	}
+    }
+    
+    setParamsToURL(){
+	window.location.hash = '#' + this.urlParams.toString();
+    }
+    
+    getParam(paramName){
+	return this.urlParams.get(paramName);
+    }
+    
+    clearFilterValues(setHash){
+	var section = this.getSection();
+	this.setSection(section,setHash);
+    }
+    
+    setFilterParams(filterValues, setHash){
+	this.clearFilterValues();
+	if(filterValues){
+        	filterValues.forEach(item => {
+        	    var fv = item.fieldValue;
+        	    this.urlParams.set(fv.id, fv.value);
+        	});
+	}
+	if(setHash){
+	    this.setParamsToURL();
+	}
+    }
+    
+    getFiltersFromParams(valuesMap){
+	var values=[];
+	this.urlParams.forEach((v,k)=>{
+	    if(k != this.SECTION_PARAM){
+		values.push({fieldValue:{id:k,value:v}});
+		if(valuesMap != null){
+		    valuesMap[k]=v;
+		}
+	    }
+	});
+	if(values.length > 0){
+	    return values;
+	}
+	return null;
+    }
 }

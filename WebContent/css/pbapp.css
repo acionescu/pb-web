@@ -171,6 +171,29 @@ button:disabled {
 	border-radius: 10px 10px 0 0;
 }
 
+.notifTitle {
+	display:inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+.notifActions {
+	display: inline-block;
+	float: right;
+	margin: 0;
+	padding: 0;
+}
+
+.notifActions a {
+	color:white;
+	cursor:pointer;
+}
+
+.actionIcon{
+	color:white;
+	margin-right: 0.5em;
+}
+
 .notifBody {
 	background-color: #F5F5DC;
 	padding: 10px;
@@ -180,12 +203,24 @@ button:disabled {
 	border-radius: 0 0 10px 10px;
 }
 
+.notifBody .notifContent a {
+	color: #4e9a06;
+	text-decoration: none;
+}
+
+.notifBody .notifContent a:hover {
+	text-decoration: underline;
+	color:#73d216;
+}
+
 .notifFooter {
 	
 }
 
-.notifStats {
+.notifInfoArea{
 	background-color: #F5F5DC;
+	padding:0;
+	margin:0;
 	padding-left: 10px;
 	padding-right: 10px;
 	padding-top: 5px;
@@ -193,7 +228,21 @@ button:disabled {
 	border-bottom: 1px solid #486666;
 }
 
+.notifStats {
+	display:inline-block;
+}
+
 .statsItem {
+	color: gray;
+	margin-right: 0.4em;
+}
+
+.notifInfo{
+	display:inline-block;
+	float: right;
+}
+
+.notifIcon{
 	color: gray;
 	margin-right: 0.4em;
 }

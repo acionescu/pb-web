@@ -1,5 +1,6 @@
 package net.segoia.pbweb.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +58,7 @@ public class DynamicGatewayServlet extends HttpServlet {
 	String serverName = request.getServerName();
 	String serverPort = (request.getServerPort() == 80) ? "" : ":" + request.getServerPort();
 	String contextPath = request.getContextPath();
-	return scheme + serverName + serverPort + contextPath;
+	return scheme + serverName + serverPort + contextPath+"/";
     }
 
     @Override

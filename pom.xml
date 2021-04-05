@@ -30,6 +30,7 @@
                <warSourceDirectory>WebContent</warSourceDirectory>
             </configuration>
          </plugin>
+         
          <plugin>
             <groupId>net.alchim31.maven</groupId>
             <artifactId>yuicompressor-maven-plugin</artifactId>
@@ -44,12 +45,15 @@
             </executions>
             <configuration>
                <nosuffix>true</nosuffix>
+               <force>true</force>
                <warSourceDirectory>${basedir}/WebContent/client/js</warSourceDirectory>
-                <webappDirectory>${basedir}/WebContent/client/min2</webappDirectory>
+                <webappDirectory>${basedir}/WebContent/client/js/min</webappDirectory>
                 
                 <excludes>
-                  <exclude>**/js/min/*.js</exclude>
-                   <exclude>**/min2/*.js</exclude>
+                   <exclude>**/event-node.js</exclude>
+                   <exclude>**/pbapp.js</exclude>
+                   <exclude>**/util.js</exclude>
+                   <exclude>**/min/*</exclude>
                </excludes>
                <lifecycleMappingMetadata>
                   <pluginExecutions>
@@ -70,6 +74,7 @@
                </lifecycleMappingMetadata>
             </configuration>
          </plugin>
+         
       </plugins>
    </build>
    <dependencies>

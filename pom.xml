@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
    <groupId>net.segoia</groupId>
@@ -27,13 +28,56 @@
             <version>2.6</version>
             <configuration>
                <warSourceDirectory>WebContent</warSourceDirectory>
-               
+            </configuration>
+         </plugin>
+         <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>yuicompressor-maven-plugin</artifactId>
+            <version>1.5.1</version>
+            <executions>
+               <execution>
+               <?m2e execute onConfiguration?>
+                  <goals>
+                     <goal>compress</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+<!--                <gzip>true</gzip> -->
+               <nosuffix>true</nosuffix>
+<!--                <sourceDirectory>WebContent/client/js/*.js</sourceDirectory> -->
+<!--                <outputDirectory>WebContent/client/min2/</outputDirectory> -->
+
+               <warSourceDirectory>${basedir}/WebContent/client/js</warSourceDirectory>
+                <webappDirectory>${basedir}/WebContent/client/min2</webappDirectory>
+                
+                <excludes>
+                  <exclude>**/js/min/*.js</exclude>
+                   <exclude>**/min2/*.js</exclude>
+               </excludes>
+               <lifecycleMappingMetadata>
+                  <pluginExecutions>
+                     <pluginExecution>
+                        <pluginExecutionFilter>
+                           <groupId>net.alchim31.maven</groupId>
+                           <artifactId>yuicompressor-maven-plugin</artifactId>
+                           <versionRange>[1.0.0,)</versionRange>
+                           <goals>
+                              <goal>compress</goal>
+                           </goals>
+                        </pluginExecutionFilter>
+                        <action>
+                           <execute />
+                        </action>
+                     </pluginExecution>
+                  </pluginExecutions>
+               </lifecycleMappingMetadata>
             </configuration>
          </plugin>
       </plugins>
    </build>
    <dependencies>
-   <dependency>
+      <dependency>
          <groupId>net.segoia</groupId>
          <artifactId>web-events</artifactId>
          <version>0.0.2-SNAPSHOT</version>

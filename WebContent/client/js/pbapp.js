@@ -558,6 +558,7 @@
 		actionsCont.append($("<a>").attr("href",actionLink).attr("target","_blank").attr("title","Deschide").append($("<i class='actionIcon fas fa-external-link-alt'></i>")));
 	    }
 	    
+	    var infoAreaVisible=false;
 	    
 	    var bodyE=ne.find(".notifBody");
 	    
@@ -566,10 +567,7 @@
 		
 		statsE.append($("<span title='Susținători'>").addClass("statsItem").append($("<i class='statsIcon fas fa-users'></i>")).append(n.stats.extraStats.relevance));
 		statsE.append($("<span title='Prioritate pe zona de impact'>").addClass("statsItem").append($("<i class='statsIcon fas fa-hashtag'></i>")).append(n.stats.extraStats.areaPriority));
-
-	    }
-	    else{
-		statsE.hide();
+		infoAreaVisible=true;
 	    }
 	   
 	    if(n.creatorData){
@@ -577,12 +575,15 @@
 		var notifInfo = ne.find(".notifInfo");
 		
 		if(n.creatorData.registrationReceivedTimestamp > 0){
+		    infoAreaVisible=true;
 		    notifInfo.append($("<i class='notifIcon fas fa-clipboard-list' title='Număr de înregistrare primit'></i>"));
 		}
 		if(n.creatorData.responseReceivedTimestamp > 0){
+		    infoAreaVisible=true;
 		    notifInfo.append($("<i class='notifIcon fas fa-comment-dots' title='Răspuns primit'></i>"));
 		}
 		if(n.creatorData.resolved){
+		    infoAreaVisible=true;
 		    notifInfo.append($("<i class='notifIcon fas fa-check-square' title='Marcată ca rezolvată'></i>"));
 		}
 	    
@@ -595,6 +596,10 @@
                  		content = content.replace(gpsCoords.lat+","+gpsCoords.lon,'<a target="_blank" href="https://www.openstreetmap.org/?mlat='+gpsCoords.lat+'&mlon='+gpsCoords.lon+'#map=15/'+gpsCoords.lat+'/'+gpsCoords.lon+'">Vezi pe hartă</a>');
                  	    }
          	    }
+	    }
+	    
+	    if(infoAreaVisible){
+		ne.find(".notifInfoArea").show();
 	    }
 	    
 	    bodyE.append($("<div>").addClass("notifContent").html(content));

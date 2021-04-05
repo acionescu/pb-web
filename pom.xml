@@ -43,11 +43,7 @@
                </execution>
             </executions>
             <configuration>
-<!--                <gzip>true</gzip> -->
                <nosuffix>true</nosuffix>
-<!--                <sourceDirectory>WebContent/client/js/*.js</sourceDirectory> -->
-<!--                <outputDirectory>WebContent/client/min2/</outputDirectory> -->
-
                <warSourceDirectory>${basedir}/WebContent/client/js</warSourceDirectory>
                 <webappDirectory>${basedir}/WebContent/client/min2</webappDirectory>
                 

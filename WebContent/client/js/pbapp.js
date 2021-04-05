@@ -607,6 +607,6 @@
 	    return ne;
     }
     
-    startTest(getTargetUrl("/ogegmob/ws/web/v0/events"));
+    startTest(getTargetUrl("/ogeg/ws/web/v0/events"));
     
     

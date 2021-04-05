@@ -12,6 +12,11 @@
 	    e.preventDefault();
 
 	});
+	
+	/* init an app controller*/
+	PB.CONTROLLER=new AppController();
+	
+	log("init app with section: "+PB.CONTROLLER.getSection());
 
     });
 
@@ -25,6 +30,9 @@
 	    
 	    logout: {
 		clickHandler: PB.MODULES.AUTH.logout
+	    },
+	    detalii:{
+		id:"detalii"
 	    }
 	    
     };
@@ -39,7 +47,9 @@
     
     /* values of filters on last refresh */
     var lastRefreshFilters={};
-
+    
+    var firstInit;
+    
     var wsHandler = {
 	onopen : function() {
 	    //                 setConnected(true);
@@ -94,6 +104,10 @@
 		
 		filtersController.onFieldValuesAvailable(data);
 	    }
+	},
+	"APP:PETITION:DATA" : function(ec) {
+	    log("got app petition data");
+	    PB.handlePetitionData(ec.event.data);
 	}
     });
 
@@ -135,6 +149,18 @@
 	}
     }
 
+    function getBaseUrl(){
+	return window.location.origin+window.location.pathname;
+    }
+    
+    function getActionLink(action,hash){
+	var params = new URLSearchParams();
+	params.set("a",action);
+	params.set("teh",hash);
+	
+	return getBaseUrl()+"dr?"+params.toString();
+    }
+    
     function initInfiniteScroll(refreshFunc) {
 	var win = $(window);
 	lastScrollFunc = function() {
@@ -173,6 +199,28 @@
 	    
 	    if (sData) {
 		if(sData.filters){
+		    if(firstInit){
+			/* save dafault values of filters at first init*/
+			sData.defaultFilterValues={};
+			sData.filters.requiredData.forEach(fd=>{
+			    if(fd.value != null){
+				sData.defaultFilterValues[fd.id]=fd.value;
+			    }
+			});
+			
+			/* extract filter values from url params */
+			PB.CONTROLLER.getFiltersFromParams(lastRefreshFilters);
+		    }
+		    else{
+			/* reset filters values to default */
+			lastRefreshFilters={};
+			if(sData.defaultFilterValues){
+        			sData.filters.requiredData.forEach(fd=>{
+        			    fd.value = sData.defaultFilterValues[fd.id];
+        			});
+			}
+		    }
+		    
 		    setupSectionFilters(sData.filters);
 		}
 		else{
@@ -223,9 +271,11 @@
 					.attr('href').substr(1)
 				+ ".html", 'f' + (Math.random()*1000000));
 	    }
-	    if(setHash){
-		window.location.hash = '#' + cid;
+	    if(setHash && !firstInit){
+//		window.location.hash = '#' + cid;
+		PB.CONTROLLER.setSection(cid,true);
 	    }
+	    firstInit=false;
 	    
 	    /* hide menu on click in mobile mode */
 	    if(!$(".toggle-nav").hasClass("active")){
@@ -244,6 +294,9 @@
 	// 	var sc = $("#sections");
 
 	var about = $("#despre");
+	
+	/* remove all dynamic elements */
+	about.prevAll().remove();
 
 	var sArray = [];
 
@@ -265,22 +318,33 @@
 	    sArray.push(s.id);
 
 	}
-
+	/* remove old click listeners */
+	$(".menu ul li").off("click");
+	
 	$(".menu ul li").click(menuClickListener);
 	
 	/* dropdown click listener */
-	
+	$(".dropdown-content a").off("click");
 	$(".dropdown-content a").click(menuClickListener);
 	
-	
+	firstInit=true;
 
-	var fragment = window.location.hash;
+//	var fragment = window.location.hash;
+	
+	var fragment= PB.CONTROLLER.getSection();
 	/* first init */
 	log("fragment="+fragment);
 	if(fragment == null || fragment.length < 2){
-	    $(".menu ul li").first().click();
+	   	    
+	    if(data.defaultSection != null){
+		displaySection("#"+data.defaultSection);
+	    }
+	    else{
+		$(".menu ul li").first().click();
+	    }
 	}
 	else{
+	    fragment="#"+fragment;
 	    var selSection=$(".menu ul").find(fragment);
 	    log("selected section: "+selSection +" length: "+selSection.length);
 	    if(selSection.length > 0){
@@ -290,10 +354,17 @@
 		$(".menu ul li").first().click();
 	    }
 	}
-	
-	
-
-	
+    }
+    
+    function displaySection(sectionId){
+	 var selSection=$(".menu ul").find(sectionId);
+	    
+	    if(selSection.length > 0){
+	    	selSection.first().click();
+	    }
+	    else{
+		$(".menu ul li").first().click();
+	    }
     }
     
     function refreshCurrentSection(){
@@ -301,7 +372,7 @@
 	/* reset last filters values */
 	lastRefreshFilters={};
 	var filtersValues = getFiltersValues();
-	log("refreshing current section");
+	log("refreshing current section "+filtersValues);
 	PB.refreshCurrentSection(filtersValues);
 	
 // 	/* remove old scroll */
@@ -352,8 +423,7 @@
 	
 	var fList=filtersData.requiredData;
 	
-	
-	filtersController = new FormDataController(fList);
+	filtersController = new FormDataController(fList,lastRefreshFilters);
 	
 	sectionFilters=filtersController.fields;
 	
@@ -362,7 +432,7 @@
 	for(var i in sectionFilters){
 	    var fc = sectionFilters[i];
 	    
-	    log("Processing filter "+fc.df.id);
+	    log("Processing filter "+fc.df.id + " with current value "+lastRefreshFilters[fc.df.id]);
 	    
 	    var fe = buildFilterElement(fc,filtersController);
 	    
@@ -420,6 +490,8 @@
 	if(fc == null){
 	    return null;
 	}
+	
+	
 	var fe = fc.getElement(dataContext);
 	log("got element "+fe +" for filter "+fc.df.id);
 	
@@ -449,25 +521,8 @@
     function refreshPublicUserDataSection(data) {
 	for ( var i in data.data.notifications) {
 	    var n = data.data.notifications[i];
-	    var ne = $("#nTemplate").clone();
-	    ne.attr('id', "notif-" + $("#contentBody").children().length);
-	    var content = n.content.replace(/\n/g, "<br/>");
-	    ne.find(".notifHeader").first().html(
-		    "Către: " + n.targetInstitutionName);
-	    var bodyE=ne.find(".notifBody");
-	    
-	    var statsE = ne.find(".notifStats");
-	    if(n.stats){
-		
-		statsE.append($("<span title='Susținători'>").addClass("statsItem").append($("<i class='statsIcon fas fa-users'></i>")).append(n.stats.extraStats.relevance));
-		statsE.append($("<span title='Prioritate pe zona de impact'>").addClass("statsItem").append($("<i class='statsIcon fas fa-hashtag'></i>")).append(n.stats.extraStats.areaPriority));
-
-	    }
-	    else{
-		statsE.hide();
-	    }
-	    
-	    bodyE.append($("<div>").html(content));
+	   
+	    var ne = buildNotifElement(n);
 
 	    // 	    $("#" + data.id).append(ne);
 	    $("#contentBody").append(ne);
@@ -480,10 +535,78 @@
 	}
     }
     
+    function buildNotifElement(n){
+	 var ne = $("#nTemplate").clone();
+	    ne.attr('id', "notif-" + $("#contentBody").children().length);
+	    var content = n.content.replace(/\n/g, "<br/>");
+	    ne.find(".notifTitle").first().html(
+		    "Către: " + n.targetInstitutionName);
+	    
+	    /* add actions */
+	    if(n.hash){
+		var actionsCont = ne.find(".notifActions");
+		/* build permalink */
+		var actionLink = getActionLink("OpenEntity",n.hash);
+		
+		var copyLinkAction = $("<a>").attr("title","Copiază link-ul").append($("<i class='actionIcon fas fa-link'></i>"));
+		copyLinkAction.click(()=>{
+		    navigator.clipboard.writeText(actionLink);
+		    PB.showInfoMessage("Link-ul a fost copiat");
+		});
+		actionsCont.append(copyLinkAction);
+		
+		actionsCont.append($("<a>").attr("href",actionLink).attr("target","_blank").attr("title","Deschide").append($("<i class='actionIcon fas fa-external-link-alt'></i>")));
+	    }
+	    
+	    var infoAreaVisible=false;
+	    
+	    var bodyE=ne.find(".notifBody");
+	    
+	    var statsE = ne.find(".notifStats");
+	    if(n.stats){
+		
+		statsE.append($("<span title='Susținători'>").addClass("statsItem").append($("<i class='statsIcon fas fa-users'></i>")).append(n.stats.extraStats.relevance));
+		statsE.append($("<span title='Prioritate pe zona de impact'>").addClass("statsItem").append($("<i class='statsIcon fas fa-hashtag'></i>")).append(n.stats.extraStats.areaPriority));
+		infoAreaVisible=true;
+	    }
+	   
+	    if(n.creatorData){
+		
+		var notifInfo = ne.find(".notifInfo");
+		
+		if(n.creatorData.registrationReceivedTimestamp > 0){
+		    infoAreaVisible=true;
+		    notifInfo.append($("<i class='notifIcon fas fa-clipboard-list' title='Număr de înregistrare primit'></i>"));
+		}
+		if(n.creatorData.responseReceivedTimestamp > 0){
+		    infoAreaVisible=true;
+		    notifInfo.append($("<i class='notifIcon fas fa-comment-dots' title='Răspuns primit'></i>"));
+		}
+		if(n.creatorData.resolved){
+		    infoAreaVisible=true;
+		    notifInfo.append($("<i class='notifIcon fas fa-check-square' title='Marcată ca rezolvată'></i>"));
+		}
+	    
+         	    var specificData = n.creatorData.specificData;
+         	    
+         	    if(specificData){
+                 	    var gpsCoords = specificData["~gpsLocation"];
+                 	    if(gpsCoords != null){
+                 		log("replace gps coords "+gpsCoords.lon+","+gpsCoords.lat);
+                 		content = content.replace(gpsCoords.lat+","+gpsCoords.lon,'<a target="_blank" href="https://www.openstreetmap.org/?mlat='+gpsCoords.lat+'&mlon='+gpsCoords.lon+'#map=15/'+gpsCoords.lat+'/'+gpsCoords.lon+'">Vezi pe hartă</a>');
+                 	    }
+         	    }
+	    }
+	    
+	    if(infoAreaVisible){
+		ne.find(".notifInfoArea").show();
+	    }
+	    
+	    bodyE.append($("<div>").addClass("notifContent").html(content));
+	    
+	    return ne;
+    }
+    
     startTest(getTargetUrl("/ogeg/ws/web/v0/events"));
-//    startTest(getTargetUrl("/pb-web/ws/web/v0/events"));
-    
-//    startTest("wss://panouldebord.ro/ogeg/ws/web/v0/events");
-    
     
     

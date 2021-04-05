@@ -23,7 +23,7 @@
     };
 
     function initMap() {
-
+	log("initializing map");
 	mymap = L.map('mapid');
 	
 	L.tileLayer(
@@ -36,6 +36,18 @@
 			    id: 'mapbox/streets-v11',
 			    accessToken:'pk.eyJ1IjoiYWNpb25lc2N1IiwiYSI6ImNra250andmZDExYzYycXJxMzUxemprZ3YifQ.XJLJEliq4OfjACW9degzFg'
 		}).addTo(mymap);
+	
+//	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+//	    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+//	    maxZoom: 18,
+//	    id: 'mapbox/streets-v11',
+//	    tileSize: 512,
+//	    zoomOffset: -1,
+//	    accessToken: 'pk.eyJ1IjoiYWNpb25lc2N1IiwiYSI6ImNra250andmZDExYzYycXJxMzUxemprZ3YifQ.XJLJEliq4OfjACW9degzFg'
+//	}).addTo(mymap);
+	
+	
+	
 	
 	/* add legend */
 	var legend = L.control({position: 'topright'});

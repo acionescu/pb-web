@@ -10,7 +10,7 @@
       <additionalparam>-Xdoclint:none</additionalparam>
    </properties>
    <build>
-      <sourceDirectory>src/main/java</sourceDirectory>
+      <sourceDirectory>src</sourceDirectory>
       <testSourceDirectory>src/test/java</testSourceDirectory>
       <plugins>
          <plugin>
@@ -27,9 +27,53 @@
             <version>2.6</version>
             <configuration>
                <warSourceDirectory>WebContent</warSourceDirectory>
-               
             </configuration>
          </plugin>
+         
+         <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>yuicompressor-maven-plugin</artifactId>
+            <version>1.5.1</version>
+            <executions>
+               <execution>
+               <?m2e execute onConfiguration?>
+                  <goals>
+                     <goal>compress</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <nosuffix>true</nosuffix>
+               <force>true</force>
+               <warSourceDirectory>${basedir}/WebContent/client/js</warSourceDirectory>
+                <webappDirectory>${basedir}/WebContent/client/js/min</webappDirectory>
+                
+                <excludes>
+                   <exclude>**/event-node.js</exclude>
+                   <exclude>**/pbapp.js</exclude>
+                   <exclude>**/util.js</exclude>
+                   <exclude>**/min/*</exclude>
+               </excludes>
+               <lifecycleMappingMetadata>
+                  <pluginExecutions>
+                     <pluginExecution>
+                        <pluginExecutionFilter>
+                           <groupId>net.alchim31.maven</groupId>
+                           <artifactId>yuicompressor-maven-plugin</artifactId>
+                           <versionRange>[1.0.0,)</versionRange>
+                           <goals>
+                              <goal>compress</goal>
+                           </goals>
+                        </pluginExecutionFilter>
+                        <action>
+                           <execute />
+                        </action>
+                     </pluginExecution>
+                  </pluginExecutions>
+               </lifecycleMappingMetadata>
+            </configuration>
+         </plugin>
+         
       </plugins>
    </build>
    <dependencies>

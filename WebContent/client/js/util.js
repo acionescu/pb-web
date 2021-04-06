@@ -225,8 +225,12 @@ class AppController{
     
     setSection(section, setHash){
 	this.urlParams = new URLSearchParams();
-	this.urlParams.set(this.SECTION_PARAM, section);
-	if(setHash){
+	if(section != null){
+	    this.urlParams.set(this.SECTION_PARAM, section);
+	}
+	
+	if(setHash && section != null){
+	    log("setting section "+section +" in url params "+setHash);
 	    this.setParamsToURL();
 	}
     }

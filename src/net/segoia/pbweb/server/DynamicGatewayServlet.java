@@ -41,8 +41,8 @@ public class DynamicGatewayServlet extends HttpServlet {
 		}
 		return;
 	    }
-	    
-	    String redirectUrl = getBaseUrl(req)+"#s=detalii&teh="+teh;
+	   
+	    String redirectUrl = getBaseUrl2(req)+"#s=detalii&teh="+teh;
 	    
 	    try {
 		c.getResp().sendRedirect(redirectUrl);
@@ -59,6 +59,14 @@ public class DynamicGatewayServlet extends HttpServlet {
 	String serverPort = (request.getServerPort() == 80) ? "" : ":" + request.getServerPort();
 	String contextPath = request.getContextPath();
 	return scheme + serverName + serverPort + contextPath+"/";
+    }
+    
+    public static String getBaseUrl2(HttpServletRequest request) {
+	StringBuffer requestURL = request.getRequestURL();
+	String servletPath = request.getServletPath();
+	int end = requestURL.indexOf(servletPath);
+	
+	return requestURL.substring(0,end)+"/";
     }
 
     @Override

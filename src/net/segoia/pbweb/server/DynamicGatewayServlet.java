@@ -42,7 +42,6 @@ public class DynamicGatewayServlet extends HttpServlet {
 		}
 		return;
 	    }
-	    System.out.println("processing request for "+req.getHeader("X-Forwarded-Host"));
 	    String redirectUrl = getDefaultBaseUrl(req) + "#s=detalii&teh=" + teh;
 
 	    try {

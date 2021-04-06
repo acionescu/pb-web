@@ -1,6 +1,5 @@
 package net.segoia.pbweb.server;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,15 +23,17 @@ public class DynamicGatewayServlet extends HttpServlet {
 
     private Map<String, DynamicRequestRouter> requestRoutersByAction = new HashMap<>();
 
+    private String BASE_URL = "https://panouldebord.ro/";
+
     @Override
     public void init() throws ServletException {
 	super.init();
 
-	requestRoutersByAction.put("OpenEntity", (c)->{
+	requestRoutersByAction.put("OpenEntity", (c) -> {
 	    HttpServletRequest req = c.getReq();
 	    String teh = req.getParameter(TARGET_ENTITY_HASH);
-	    
-	    if(teh == null || teh.isEmpty()) {
+
+	    if (teh == null || teh.isEmpty()) {
 		try {
 		    c.getResp().sendError(HttpServletResponse.SC_BAD_REQUEST);
 		} catch (IOException e) {
@@ -41,9 +42,9 @@ public class DynamicGatewayServlet extends HttpServlet {
 		}
 		return;
 	    }
-	   
-	    String redirectUrl = getBaseUrl2(req)+"#s=detalii&teh="+teh;
-	    
+	    System.out.println("processing request for "+req.getHeader("X-Forwarded-Host"));
+	    String redirectUrl = getDefaultBaseUrl(req) + "#s=detalii&teh=" + teh;
+
 	    try {
 		c.getResp().sendRedirect(redirectUrl);
 	    } catch (IOException e) {
@@ -58,35 +59,42 @@ public class DynamicGatewayServlet extends HttpServlet {
 	String serverName = request.getServerName();
 	String serverPort = (request.getServerPort() == 80) ? "" : ":" + request.getServerPort();
 	String contextPath = request.getContextPath();
-	return scheme + serverName + serverPort + contextPath+"/";
+	return scheme + serverName + serverPort + contextPath + "/";
     }
-    
+
     public static String getBaseUrl2(HttpServletRequest request) {
 	StringBuffer requestURL = request.getRequestURL();
 	String servletPath = request.getServletPath();
 	int end = requestURL.indexOf(servletPath);
-	
-	return requestURL.substring(0,end)+"/";
+
+	return requestURL.substring(0, end) + "/";
+    }
+
+    private String getDefaultBaseUrl(HttpServletRequest request) {
+	if (BASE_URL != null) {
+	    return BASE_URL;
+	}
+	return getBaseUrl2(request);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-	
+
 	String action = req.getParameter(ACTION_PARAM);
-	
-	if(action == null) {
+
+	if (action == null) {
 	    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 	    return;
 	}
-	
+
 	DynamicRequestRouter router = requestRoutersByAction.get(action);
-	if(router != null) {
+	if (router != null) {
 	    router.route(new DynamicRequestContext(req, resp));
 	    return;
 	}
-	
+
 	resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-	    return;
+	return;
     }
 
 }
